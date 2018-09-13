@@ -1,0 +1,2 @@
+chatter
+-DCATKIN_DEVEL_PREFIX=/home/albert/ros/lab3/Lab_3_Resources/lab3/devel -DCMAKE_INSTALL_PREFIX=/home/albert/ros/lab3/Lab_3_Resources/lab3/install -G Unix Makefiles
