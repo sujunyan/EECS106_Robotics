@@ -1,8 +1,0 @@
-prefix=/home/albert/ros/lab3/Lab_3_Resources/lab3/install
-
-Name: chatter
-Description: Description of chatter
-Version: 0.0.0
-Cflags: 
-Libs: -L/home/albert/ros/lab3/Lab_3_Resources/lab3/install/lib 
-Requires: 
