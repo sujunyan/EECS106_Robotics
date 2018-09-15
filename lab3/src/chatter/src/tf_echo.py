@@ -16,15 +16,16 @@ def tf_echo():
             continue
         #print type(trans.transform)
         print "time :", trans.header.stamp
-        print "translation: ",trans.transform.translation.x,\
+        print "translation: ",[trans.transform.translation.x,\
             trans.transform.translation.y,\
-            trans.transform.translation.z
-        print "rotation: ", trans.transform.rotation.x,\
+            trans.transform.translation.z]
+        print "rotation: ", [trans.transform.rotation.x,\
             trans.transform.rotation.y,\
             trans.transform.rotation.z,\
-            trans.transform.rotation.w
+            trans.transform.rotation.w]
+	print ""
 
-        #rate.sleep()
+        rate.sleep()
     
     
 #Python's syntax for a main() method
