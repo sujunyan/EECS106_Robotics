@@ -28,14 +28,22 @@ def callback(message):
     theta[6] = message.position[8]
 
     trans = lab3(theta)
-    rate = rospy.Rate(10.0)
-    print "time: ", message.header.stamp
+    #rate = rospy.Rate(100.0)
+    print "time: ",  message.header.stamp 
     print "translation: ", trans[0:3, 3]
+    Roll = math.atan(trans[2][1] / trans[2][2])
+    Pitch = math.atan(-trans[2][0]/ \
+        math.sqrt(trans[2][1]*trans[2][1]+trans[2][2]*trans[2][2]))
+    Yaw = math.atan(trans[1][0]/ trans[0][0])
+    print "RPY ",[Roll,Pitch,Yaw],"\n"
+    """
     print "alpha: ", math.atan(trans[1][0]/ trans[0][0])
     print "beta ", math.atan(-trans[2][0]/ \
         math.sqrt(trans[2][1]*trans[2][1]+trans[2][2]*trans[2][2]))
     print "gama: ", math.atan(trans[2][1] / trans[2][2])
-    rate.sleep()
+    print ""
+    """
+    #rate.sleep()
     #print(rospy.get_name())
     
     #print("velocity",message.velocity)

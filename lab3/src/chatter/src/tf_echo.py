@@ -24,7 +24,7 @@ def tf_echo():
             trans.transform.rotation.z,\
             trans.transform.rotation.w
 
-        rate.sleep()
+        #rate.sleep()
     
     
 #Python's syntax for a main() method
