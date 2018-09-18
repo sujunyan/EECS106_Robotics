@@ -30,6 +30,7 @@ def check_homography(image, H, nx, ny, length=TILE_LENGTH):
       cv2.circle(image, (u,v), 5, 0, -1)
   cv2.imshow('Check Homography', image)
 
+
 # Create a CvBridge to convert ROS messages to OpenCV images
 bridge = CvBridge()
 
@@ -40,6 +41,9 @@ def ros_to_np_img(ros_img_msg):
 # Define the total number of clicks we are expecting (4 corners)
 TOT_CLICKS = 4
 
+
+
+############ The main function ###############-------------------------------------------------
 if __name__ == '__main__':
   
   # Waits for the image service to become available
@@ -108,7 +112,39 @@ if __name__ == '__main__':
       # the image
       nx = 4
       ny = 3
-      H = np.eye(3)
+      
+      u = uv[0]
+      v = uv[1]
+      ## (x1,y1) ... are
+      ## (0,0) , (0,ny*TILE_LENGTH) (nx*TILE_LENGTH,ny*TILE_LENGTH),(nx*TILE_LENGTH,0)
+      # The matrix A in the doc
+      x = [0,0,nx*TILE_LENGTH,nx*TILE_LENGTH]
+      y = [0,ny*TILE_LENGTH,ny*TILE_LENGTH,0]
+      A = []
+      for i in range(4):
+        A.append([x[i],y[i],1,0,0,0,-u[i]*x[i],-u[i]*y[i] ])
+        A.append([0,0,0,x[i],y[i],1,-v[i]*x[i],-v[i]*y[i] ] )
+        '''
+        A = np.append(A,[ \
+            [x[i],y[i],1,0,0,0,-u[i]*x[i],-u[i]*y[i]], 
+            [0,0,0,x[i],y[i],1,-v[i]*x[i],-v[i]*y[i] ] 
+            ])
+            '''
+
+      
+      b = np.append(u,v)
+      #print H
+      print A
+      print x,y,u,v
+      print b
+      x = np.dot (inv(A),b)
+      H = np.array([ [x[0],x[1],x[2]], \
+                    [x[3],x[4],x[5]], \
+                    [x[6],x[7], 1]])
+      print H
+      print x
+      #H = np.eye(3)
+
 
 # ==============================================================================
       
