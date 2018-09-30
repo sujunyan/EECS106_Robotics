@@ -8,7 +8,7 @@ import numpy as np
 from numpy.linalg import *
 
 
-# Nominal length of a tile side
+# Nominal length 666of a tile side
 TILE_LENGTH = 30.48 #cm
 
 # Helper function to check computed homography
@@ -110,7 +110,7 @@ if __name__ == '__main__':
       
       # This is placeholder code that will draw a 4 by 3 grid in the corner of
       # the image
-      nx = 4
+      nx = 3
       ny = 3
       
       u = uv[0]
@@ -132,7 +132,8 @@ if __name__ == '__main__':
             '''
 
       
-      b = np.append(u,v)
+      #b = np.append(u,v)
+      #b = [u[i],v[i] for i in range]
       #print H
       print A
       print x,y,u,v
