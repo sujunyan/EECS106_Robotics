@@ -36,7 +36,7 @@ def lab3(theta):
     # YOUR CODE HERE
     gst_0 = np.ndarray((4,4))
     gst_0[0:3, 0:3] = R
-    gst_0[0:3, 3] = np.transpose(q[0:3,7]) 
+    gst_0[0:3, 3] = np.transpose(q[0:3,7])
     gst_0[3][3] = 1
     #print "gst_", gst_0
 
@@ -48,6 +48,7 @@ def lab3(theta):
     g = kfs.prod_exp(xi, theta)
     g_final = g.dot(gst_0)
     return g_final
+
 if __name__ == "__main__":
     print('Lab 3')
     #theta = np.ndarray((7,1))

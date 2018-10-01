@@ -2,6 +2,7 @@
 import rospy
 from moveit_msgs.srv import GetPositionIK, GetPositionIKRequest, GetPositionIKResponse
 from geometry_msgs.msg import PoseStamped
+import lab3_helper
 
 def main():
     #Wait for the IK service to become available
@@ -48,8 +49,20 @@ def main():
 
             #Print the response HERE
             #print(response)
-            print(response.error_code)
-            print(response.solution)
+            #print(response.error_code)
+            #print(response.solution)
+            error_code = response.error_code
+            if error_code != 1:
+                print("Get solution error with code %f\n"%(error_code,))
+            else:
+                print("position input (%f,%f,%f)"%position)
+                print("Solution get:")
+                joint_state = response.solution.joint_state
+                print(joint_state)
+                print("Result by forward_kinematics")
+                lab3_helper.forward_kinematics(joint_state)
+
+
 
         except rospy.ServiceException, e:
             print "Service call failed: %s"%e
