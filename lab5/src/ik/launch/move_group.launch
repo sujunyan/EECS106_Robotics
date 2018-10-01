@@ -8,7 +8,7 @@
   <arg unless="$(arg debug)" name="launch_prefix" value="" />
   <arg     if="$(arg debug)" name="launch_prefix" value="gdb --ex run --args" />
 
-  <arg name="info" default="$(arg debug)" />  
+  <arg name="info" default="$(arg debug)" />
   <arg unless="$(arg info)" name="command_args" value="" />
   <arg     if="$(arg info)" name="command_args" value="--debug" />
 
@@ -22,12 +22,12 @@
   </include>
 
   <include ns="move_group" file="$(find baxter_moveit_config)/launch/trajectory_execution.launch" if="$(arg allow_trajectory_execution)">
-    <arg name="moveit_controller_manager" value="baxter" /> 
+    <arg name="moveit_controller_manager" value="baxter" />
     <arg name="moveit_manage_controllers" value="true" />
   </include>
 
   <include ns="move_group" file="$(find baxter_moveit_config)/launch/sensor_manager.launch" if="$(arg allow_trajectory_execution)">
-    <arg name="moveit_sensor_manager" value="baxter" /> 
+    <arg name="moveit_sensor_manager" value="baxter" />
   </include>
 
   <node name="move_group" launch-prefix="$(arg launch_prefix)" pkg="moveit_ros_move_group" type="move_group" respawn="false" output="screen" args="joint_states:=/robot/joint_states $(arg command_args)">
@@ -55,5 +55,8 @@
     <param name="planning_scene_monitor/publish_state_updates" value="$(arg publish_monitored_planning_scene)" />
     <param name="planning_scene_monitor/publish_transforms_updates" value="$(arg publish_monitored_planning_scene)" />
   </node>
-  
+
+
+  <node name="" pkg="ik" type="service_query.py"  respawn="false" output="screen" />
+
 </launch>
