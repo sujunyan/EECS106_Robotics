@@ -2,8 +2,8 @@
 
 import numpy as np
 import scipy as sp
-
-
+from scipy import linalg
+import math
 def skew_3d(omega):
     """
     Converts a rotation vector in 3D to its corresponding skew-symmetric matrix.
@@ -225,7 +225,7 @@ def lab3(theta):
 # Input sensor_msgs/JointState
 def forward_kinematics(message):
 
-    mydict = {i:j for i in message.name, for j in message.position}
+    mydict = dict(zip(message.name,message.position))
     #Print the contents of the message to the console
     theta = np.ndarray((7,1))
     #print "position", message.position[8]
@@ -240,7 +240,7 @@ def forward_kinematics(message):
     theta[6] = message.position[8]
     '''
 
-    theta[0] =  mydict['left_s0']
+    theta[0] = mydict['left_s0']
     theta[1] = mydict['left_s1']
     theta[2] = mydict['left_e0']
     theta[3] = mydict['left_e1']

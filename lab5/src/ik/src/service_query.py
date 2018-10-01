@@ -53,12 +53,12 @@ def main():
             #print(response.solution)
             error_code = response.error_code.val
             if error_code != 1:
-                print("Get solution error with code %d\n"%(int(error_code.val),))
+                print("Get solution error with code %d\n"%((error_code),))
             else:
                 print("position input (%f,%f,%f)"%tuple(position))
                 print("Solution get:")
                 joint_state = response.solution.joint_state
-                print(joint_state)
+                #print(joint_state)
                 print("Result by forward_kinematics")
                 lab3_helper.forward_kinematics(joint_state)
 
