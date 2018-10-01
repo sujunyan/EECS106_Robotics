@@ -14,12 +14,13 @@ def main():
     while not rospy.is_shutdown():
 
         ## get the (x,y,z) from the user
-        while true:
+        while True:
             position = raw_input('Press enter to compute an IK solution:(x,y,z)')
             position = position.split()
             if len(position) != 3:
                 print "error: Please enter 3 floats"
             else:
+                position = [float(i) for i in position]
                 break
 
 
