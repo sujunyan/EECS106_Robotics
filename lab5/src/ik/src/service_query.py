@@ -51,11 +51,11 @@ def main():
             #print(response)
             #print(response.error_code)
             #print(response.solution)
-            error_code = response.error_code
+            error_code = response.error_code.val
             if error_code != 1:
-                print("Get solution error with code %f\n"%(error_code,))
+                print("Get solution error with code %d\n"%(int(error_code.val),))
             else:
-                print("position input (%f,%f,%f)"%position)
+                print("position input (%f,%f,%f)"%tuple(position))
                 print("Solution get:")
                 joint_state = response.solution.joint_state
                 print(joint_state)
