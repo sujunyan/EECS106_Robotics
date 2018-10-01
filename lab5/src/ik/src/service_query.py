@@ -47,7 +47,9 @@ def main():
             response = compute_ik(request)
 
             #Print the response HERE
-            print(response)
+            #print(response)
+            print(response.error_code)
+            print(response.solution)
 
         except rospy.ServiceException, e:
             print "Service call failed: %s"%e
