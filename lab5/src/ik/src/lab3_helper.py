@@ -225,10 +225,12 @@ def lab3(theta):
 # Input sensor_msgs/JointState
 def forward_kinematics(message):
 
+    mydict = {i:j for i in message.name, for j in message.position}
     #Print the contents of the message to the console
     theta = np.ndarray((7,1))
     #print "position", message.position[8]
     #print theta
+    '''
     theta[0] = message.position[4]
     theta[1] = message.position[5]
     theta[2] = message.position[2]
@@ -236,6 +238,15 @@ def forward_kinematics(message):
     theta[4] = message.position[6]
     theta[5] = message.position[7]
     theta[6] = message.position[8]
+    '''
+
+    theta[0] =  mydict['left_s0']
+    theta[1] = mydict['left_s1']
+    theta[2] = mydict['left_e0']
+    theta[3] = mydict['left_e1']
+    theta[4] = mydict['left_w0']
+    theta[5] = mydict['left_w1']
+    theta[6] = mydict['left_w2']
 
     trans = lab3(theta)
     #rate = rospy.Rate(100.0)
