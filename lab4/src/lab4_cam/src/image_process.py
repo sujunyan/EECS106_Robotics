@@ -6,9 +6,9 @@ import cv2, time, sys
 from cv_bridge import CvBridge, CvBridgeError
 import numpy as np
 from numpy.linalg import *
+import math
 
-
-# Nominal length 666of a tile side
+# Nominal length of a tile side
 TILE_LENGTH = 30.48 #cm
 
 # Helper function to check computed homography
@@ -30,7 +30,6 @@ def check_homography(image, H, nx, ny, length=TILE_LENGTH):
       cv2.circle(image, (u,v), 5, 0, -1)
   cv2.imshow('Check Homography', image)
 
-
 # Create a CvBridge to convert ROS messages to OpenCV images
 bridge = CvBridge()
 
@@ -39,11 +38,8 @@ def ros_to_np_img(ros_img_msg):
   return np.array(bridge.imgmsg_to_cv2(ros_img_msg,'bgr8'))
 
 # Define the total number of clicks we are expecting (4 corners)
-TOT_CLICKS = 4
+TOT_CLICKS = 6
 
-
-
-############ The main function ###############-------------------------------------------------
 if __name__ == '__main__':
   
   # Waits for the image service to become available
@@ -105,49 +101,59 @@ if __name__ == '__main__':
       #   | u1 u2 u3 u4 |
       #   | v1 v2 v3 v4 |
       uv = np.array(points).T
-
+      print(uv)
 # === YOUR CODE HERE ===========================================================
       
       # This is placeholder code that will draw a 4 by 3 grid in the corner of
       # the image
-      nx = 3
-      ny = 3
+      nx = 2
+      ny = 2
+      H = np.eye(3)
+      A = np.ndarray((8,8))
+      A[0] = [0,0,1,0,0,0,-uv[0][0] * 0, - uv[0][0] * 0]
+      A[1] = [0,0,0,0,0,1,-uv[1][0] * 0, - uv[1][0] * 0]
+
+      A[2] = [0, 30.48*ny ,1,0,0,0, -uv[0][1] * 0, - uv[0][1] * 30.48*ny]
+      A[3] = [0,0,0,0, 30.48*ny, 1, -uv[1][1] * 0, - uv[1][1] * 30.48*ny]
       
-      u = uv[0]
-      v = uv[1]
-      ## (x1,y1) ... are
-      ## (0,0) , (0,ny*TILE_LENGTH) (nx*TILE_LENGTH,ny*TILE_LENGTH),(nx*TILE_LENGTH,0)
-      # The matrix A in the doc
-      x = [0,0,nx*TILE_LENGTH,nx*TILE_LENGTH]
-      y = [0,ny*TILE_LENGTH,ny*TILE_LENGTH,0]
-      A = []
+      A[4] = [30.48*nx,30.48*ny,1,0,0,0,-uv[0][2] * 30.48*nx, - uv[0][2] * 30.48*ny]
+      A[5] = [0,0,0,30.48*nx,30.48*ny,1,-uv[1][2] * 30.48*nx, - uv[1][2] * 30.48*ny]
+      
+      A[6] = [30.48*nx,0,1,0,0,0,-uv[0][3] * 30.48*nx, - uv[0][3] * 0]
+      A[7] = [0,0,0,30.48*nx,0,1,-uv[1][3] * 30.48*nx, - uv[1][3] * 0]
+      b = np.ndarray((1,8))
+      print(b)
       for i in range(4):
-        A.append([x[i],y[i],1,0,0,0,-u[i]*x[i],-u[i]*y[i] ])
-        A.append([0,0,0,x[i],y[i],1,-v[i]*x[i],-v[i]*y[i] ] )
-        '''
-        A = np.append(A,[ \
-            [x[i],y[i],1,0,0,0,-u[i]*x[i],-u[i]*y[i]], 
-            [0,0,0,x[i],y[i],1,-v[i]*x[i],-v[i]*y[i] ] 
-            ])
-            '''
+        b[0][i*2] = uv[0][i]
+        b[0][i*2+1] = uv[1][i]
 
-      
-      #b = np.append(u,v)
-      #b = [u[i],v[i] for i in range]
-      #print H
-      print A
-      print x,y,u,v
-      print b
-      x = np.dot (inv(A),b)
-      H = np.array([ [x[0],x[1],x[2]], \
-                    [x[3],x[4],x[5]], \
-                    [x[6],x[7], 1]])
-      print H
-      print x
-      #H = np.eye(3)
+      x = np.dot(linalg.inv(A),b.T)
+      H[0][0] = x[0]
+      H[0][1] = x[1]
+      H[0][2] = x[2]
+      H[1][0] = x[3]
+      H[1][1] = x[4]
+      H[1][2] = x[5]
+      H[2][0] = x[6]
+      H[2][1] = x[7]
+      H[2][2] = 1
 
+      q = linalg.inv(H)
+      x1 = (q[0][0]*uv[0][4] + q[0][1]*uv[1][4] + q[0][2]) \
+            / (q[2][0]*uv[0][4] + q[2][1]*uv[1][4] + q[2][2]) 
 
-# ==============================================================================
+      y1 = (q[1][0]*uv[0][4] + q[1][1]*uv[1][4] + q[1][2]) \
+            / (q[2][0]*uv[0][4] + q[2][1]*uv[1][4] + q[2][2])
+
+      x2 = (q[0][0]*uv[0][5] + q[0][1]*uv[1][5] + q[0][2]) \
+            / (q[2][0]*uv[0][5] + q[2][1]*uv[1][5] + q[2][2]) 
+
+      y2 = (q[1][0]*uv[0][5] + q[1][1]*uv[1][5] + q[1][2]) \
+            / (q[2][0]*uv[0][5] + q[2][1]*uv[1][5] + q[2][2]) 
+      print "length "
+      print math.sqrt((x1-x2)**2 + (y1 - y2)**2)     
+      print "..............................\n\n........................" 
+# =============================================================================
       
       # Check the produced homography matrix
       check_homography(np_image, H, nx, ny)
