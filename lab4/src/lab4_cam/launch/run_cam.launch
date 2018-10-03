@@ -4,13 +4,13 @@
 
     <!-- Parameters for Microsoft cameras 
     <param name="image_width" value="1280" />
-    <param name="image_height" value="720" />     -->
+    <param name="image_height" value="720" />     
 	<param name="image_width" value="1280" />
-    <param name="image_height" value="720" />
+    <param name="image_height" value="720" />-->
 
     <!-- Parameters for Logitech cameras -->
-    <!-- <param name="image_width" value="640" /> -->
-    <!-- <param name="image_height" value="472" /> -->
+    <param name="image_width" value="640" /> 
+    <param name="image_height" value="472" /> 
 
     <param name="pixel_format" value="mjpeg" />
     <param name="camera_frame_id" value="usb_cam" />
@@ -25,9 +25,9 @@
   </node>
 
   <!-- Uncomment below to run the camera service and image processing -->
-  <!--  -->
+  <!-- 
   <node name="camera_srv" pkg="lab4_cam" type="camera_srv.py"  respawn="false" output="screen" />
   <node name="image_process" pkg="lab4_cam" type="image_process.py"  respawn="false" output="screen" />
-
+  -->
 
 </launch>
