@@ -44,13 +44,16 @@ def controller(turtlebot_frame, goal_frame):
 
       # Process trans to get your state error
       # Generate a control command to send to the robot
-      x_err = trans.transform.x
-      y_err = trans.transform.y
+      #print trans.transform
+      x_err = trans.transform.translation.x
+      y_err = trans.transform.translation.y
 
       control_command = Twist()
       control_command.linear.x = x_err * K1;
       control_command.angular.z = y_err * K2;
 
+      print x_err,y_err
+      print control_command
 
 
 
