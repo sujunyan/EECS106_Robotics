@@ -26,7 +26,7 @@ def controller(turtlebot_frame, goal_frame):
   ################################### YOUR CODE HERE ##############
 
   #Create a publisher and a tf buffer, which is primed with a tf listener
-  pub = rospy.Publisher('/cmd_vel', Twist, queue_size=10) ## TODO maybe wrong and need to modify
+  pub = rospy.Publisher('/cmd_vel_mux/input/teleop', Twist, queue_size=10) ## TODO maybe wrong and need to modify
   tfBuffer = tf2_ros.Buffer()
   tfListener = tf2_ros.TransformListener(tfBuffer)
 
@@ -53,7 +53,7 @@ def controller(turtlebot_frame, goal_frame):
       control_command.angular.z = y_err * K2;
 
       print x_err,y_err
-      print control_command
+      #print control_command
 
 
 

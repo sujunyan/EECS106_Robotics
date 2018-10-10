@@ -1,0 +1,4 @@
+
+Node: an executable that uses ROS to communicate with other nodes
+• Message: a ROS datatype used to exchange data between nodes
+• Topic: nodes can publish messages to a topic as well as subscribe to a topic to receive messages
