@@ -13,6 +13,7 @@ from geometry_msgs.msg import PoseStamped
 
 from path_planner import PathPlanner
 from baxter_interface import Limb
+from controller import Controller
 # from intera_interface import Limb
 
 def main():
@@ -38,6 +39,8 @@ def main():
     Kd = 0.01 * np.array([2, 1, 2, 0.5, 0.5, 0.5, 0.5]) # Stolen from 106B Students
     Ki = 0.01 * np.array([1, 1, 1, 1, 1, 1, 1]) # Untuned
     Kw = np.array([0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9]) # Untuned
+
+    my_controller = Controller(Kp, Kd, Ki, Kw, Limb)
 
     ##
     ## Add the obstacle to the planning scene here
@@ -91,6 +94,10 @@ def main():
                     plan = planner.plan_to_pose(goal_1, list(), orien_const)
 
                 raw_input("Press <Enter> to move the right arm to goal pose 1: ")
+                
+                # if not my_controller.execute_path(plan):
+                #     raise Exception("Execution failed")
+
                 if not planner.execute_plan(plan):
                     raise Exception("Execution failed")
             except Exception as e:
@@ -122,6 +129,8 @@ def main():
                     plan = planner.plan_to_pose(goal_2, list(), orien_const)
 
                 raw_input("Press <Enter> to move the right arm to goal pose 2: ")
+                # if not my_controller.execute_path(plan):
+                #     raise Exception("Execution failed")
                 if not planner.execute_plan(plan):
                     raise Exception("Execution failed")
             except Exception as e:
@@ -152,6 +161,10 @@ def main():
                     plan = planner.plan_to_pose(goal_3, list(), orien_const)
 
                 raw_input("Press <Enter> to move the right arm to goal pose 3: ")
+
+                # if not my_controller.execute_path(plan):
+                #     raise Exception("Execution failed")
+
                 if not planner.execute_plan(plan):
                     raise Exception("Execution failed")
             except Exception as e:
