@@ -19,6 +19,16 @@ def main():
     """
     Main Script
     """
+    use_orien_const = False
+    input = raw_input("use orientation constraint? y/n\n")
+    if input == 'y' or input == 'yes':
+        use_orien_const = True
+        print("using orientation constraint")
+    else input == 'n' or input == 'no':
+        use_orien_const = False
+        print("not using orientation constraint")
+    else:
+        print("input error, not using orientation constraint as default")
 
     # Make sure that you've looked at and understand path_planner.py before starting
 
@@ -35,14 +45,14 @@ def main():
 
     # #Create a path constraint for the arm
     # #UNCOMMENT FOR THE ORIENTATION CONSTRAINTS PART
-    # orien_const = OrientationConstraint()
-    # orien_const.link_name = "right_gripper";
-    # orien_const.header.frame_id = "base";
-    # orien_const.orientation.y = -1.0;
-    # orien_const.absolute_x_axis_tolerance = 0.1;
-    # orien_const.absolute_y_axis_tolerance = 0.1;
-    # orien_const.absolute_z_axis_tolerance = 0.1;
-    # orien_const.weight = 1.0;
+    orien_const = OrientationConstraint()
+    orien_const.link_name = "right_gripper";
+    orien_const.header.frame_id = "base";
+    orien_const.orientation.y = -1.0;
+    orien_const.absolute_x_axis_tolerance = 0.1;
+    orien_const.absolute_y_axis_tolerance = 0.1;
+    orien_const.absolute_z_axis_tolerance = 0.1;
+    orien_const.weight = 1.0;
 
     while not rospy.is_shutdown():
 
@@ -61,8 +71,10 @@ def main():
                 goal_1.pose.orientation.y = -1.0
                 goal_1.pose.orientation.z = 0.0
                 goal_1.pose.orientation.w = 0.0
-
-                plan = planner.plan_to_pose(goal_1, list())
+                if not use_orien_const:
+                    plan = planner.plan_to_pose(goal_1, list())
+                else:
+                    plan = planner.plan_to_pose(goal_1, list(), orien_const)
 
                 raw_input("Press <Enter> to move the right arm to goal pose 1: ")
                 if not planner.execute_plan(plan):
@@ -88,7 +100,12 @@ def main():
                 goal_2.pose.orientation.z = 0.0
                 goal_2.pose.orientation.w = 0.0
 
-                plan = planner.plan_to_pose(goal_2, list())
+                # plan = planner.plan_to_pose(goal_2, list())
+
+                if not use_orien_const:
+                    plan = planner.plan_to_pose(goal_2, list())
+                else:
+                    plan = planner.plan_to_pose(goal_2, list(), orien_const)
 
                 raw_input("Press <Enter> to move the right arm to goal pose 2: ")
                 if not planner.execute_plan(plan):
@@ -114,7 +131,11 @@ def main():
                 goal_3.pose.orientation.z = 0.0
                 goal_3.pose.orientation.w = 0.0
 
-                plan = planner.plan_to_pose(goal_3, list())
+                # plan = planner.plan_to_pose(goal_3, list())
+                if not use_orien_const:
+                    plan = planner.plan_to_pose(goal_3, list())
+                else:
+                    plan = planner.plan_to_pose(goal_3, list(), orien_const)
 
                 raw_input("Press <Enter> to move the right arm to goal pose 3: ")
                 if not planner.execute_plan(plan):
