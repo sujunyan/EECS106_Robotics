@@ -42,6 +42,20 @@ def main():
     ##
     ## Add the obstacle to the planning scene here
     ##
+    name = "obstacle_1"
+    size = np.array([0.4, 1.2, 0.1])
+    pose = PoseStamped()
+    pose.header.frame_id = "base"
+    #x, y, and z position
+    pose.pose.position.x = 0.5
+    pose.pose.position.y = 0.0
+    pose.pose.position.z = 0.0
+    #Orientation as a quaternion
+    pose.pose.orientation.x = 0.0
+    pose.pose.orientation.y = 0.0
+    pose.pose.orientation.z = 0.0
+    pose.pose.orientation.w = 1.0
+    planner.add_add_box_obstacle(size, name, pose)
 
     # #Create a path constraint for the arm
     # #UNCOMMENT FOR THE ORIENTATION CONSTRAINTS PART
