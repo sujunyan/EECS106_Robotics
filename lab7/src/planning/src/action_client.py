@@ -40,9 +40,32 @@ def main():
     
     #Set the start state for the trajectory
     goal.request.start_state.joint_state.name = joint_names
-    goal.request.start_state.joint_state.position = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-    goal.request.start_state.joint_state.velocity = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-    
+        
+    '''
+    changed by zishu yu start
+    '''
+    # goal.request.start_state.joint_state.position = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    # goal.request.start_state.joint_state.velocity = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    position = raw_input("please input %d start position for " + str(joint_names) %len(joint_names))
+    position =  position.split()
+    while (not (len(position) == len(joint_names))):
+        position = raw_input("please input %d start position for " + str(joint_names)%len(joint_names))
+        position =  position.split()
+    velocity = raw_input("please input %d start position for " + str(joint_names)%len(joint_names))
+    velocity =  velocity.split()
+    while (not (len(velocity) == len(joint_names))):
+        velocity = raw_input("please input %d start velocity for " + str(joint_names)%len(joint_names))
+        velocity =  velocity.split()
+
+    position = [float(position[i]) for i in range(len(position))]
+    velocity = [float(velocity[i]) for i in range(len(velocity))]
+    goal.request.start_state.joint_state.position = position
+    goal.request.start_state.joint_state.velocity = velocity
+
+    '''
+    changed by zishu yu end
+    '''
+
     #Tell MoveIt whether to execute the trajectory after planning it
     goal.planning_options.plan_only = True
     
@@ -50,7 +73,20 @@ def main():
     #Note that the goal is specified with a collection of individual
     #joint constraints, rather than a vector of joint angles
     arm_joint_names = joint_names[1:]
-    target_joint_angles = [0.5, -0.1, 0.1, 0.1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    '''
+    changed by zishu yu start
+    '''
+    # target_joint_angles = [0.5, -0.1, 0.1, 0.1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    target_joint_angles = raw_input("please input %d end position for " + str(joint_names)%len(arm_joint_names))
+    target_joint_angles =  target_joint_angles.split()
+    while (not (len(target_joint_angles) == len(arm_joint_names))):
+        target_joint_angles = raw_input("please input %d end position for " + str(joint_names)%len(arm_joint_names))
+        target_joint_angles =  target_joint_angles.split()
+    target_joint_angles = [float(target_joint_angles[i]) for i in range(len(target_joint_angles))]
+    
+    '''
+    changed by zishu yu end
+    '''
     tolerance = 0.0001
     consts = []
     for i in range(len(arm_joint_names)):

@@ -32,7 +32,7 @@ def controller(turtlebot_frame, goal_frame):
 
   # Create a timer object that will sleep long enough to result in
   # a 10Hz publishing rate
-  r = rospy.Rate(10) # 10hz
+  r = rospy.Rate(5) # 10hz
 
   K1 = 0.3
   K2 = 1
