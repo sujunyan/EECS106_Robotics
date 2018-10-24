@@ -25,12 +25,33 @@ def main():
     if input == 'y' or input == 'yes':
         use_orien_const = True
         print("using orientation constraint")
-    else input == 'n' or input == 'no':
+    elif input == 'n' or input == 'no':
         use_orien_const = False
         print("not using orientation constraint")
     else:
         print("input error, not using orientation constraint as default")
 
+    add_box = False
+    input = raw_input("add_box? y/n\n")
+    if input == 'y' or input == 'yes':
+        add_box = True
+        print("add_box")
+    elif input == 'n' or input == 'no':
+        add_box = False
+        print("not add_box")
+    else:
+        print("input error, not add_box as default")
+
+    open_loop_contro = False
+    input = raw_input("using open loop controller? y/n\n")
+    if input == 'y' or input == 'yes':
+        open_loop_contro = True
+        print("using open loop controller")
+    elif input == 'n' or input == 'no':
+        open_loop_contro = False
+        print("not using open loop controller")
+    else:
+        print("input error, not using open loop controller as default")
     # Make sure that you've looked at and understand path_planner.py before starting
 
     planner = PathPlanner("right_arm")
@@ -40,25 +61,27 @@ def main():
     Ki = 0.01 * np.array([1, 1, 1, 1, 1, 1, 1]) # Untuned
     Kw = np.array([0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9]) # Untuned
 
-    my_controller = Controller(Kp, Kd, Ki, Kw, Limb)
+    # joint_names = ['head_pan', 'left_s0', 'left_s1', 'left_e0', 'left_e1', 'left_w0', 'left_w1', 'left_w2', 'right_s0', 'right_s1', 'right_e0', 'right_e1', 'right_w0', 'right_w1', 'right_w2']
+    my_controller = Controller(Kp, Kd, Ki, Kw, Limb("right"))
 
     ##
     ## Add the obstacle to the planning scene here
     ##
-    name = "obstacle_1"
-    size = np.array([0.4, 1.2, 0.1])
-    pose = PoseStamped()
-    pose.header.frame_id = "base"
-    #x, y, and z position
-    pose.pose.position.x = 0.5
-    pose.pose.position.y = 0.0
-    pose.pose.position.z = 0.0
-    #Orientation as a quaternion
-    pose.pose.orientation.x = 0.0
-    pose.pose.orientation.y = 0.0
-    pose.pose.orientation.z = 0.0
-    pose.pose.orientation.w = 1.0
-    planner.add_add_box_obstacle(size, name, pose)
+    if add_box:
+        name = "obstacle_1"
+        size = np.array([0.4, 1.2, 0.1])
+        pose = PoseStamped()
+        pose.header.frame_id = "base"
+        #x, y, and z position
+        pose.pose.position.x = 0.5
+        pose.pose.position.y = 0.0
+        pose.pose.position.z = 0.0
+        #Orientation as a quaternion
+        pose.pose.orientation.x = 0.0
+        pose.pose.orientation.y = 0.0
+        pose.pose.orientation.z = 0.0
+        pose.pose.orientation.w = 1.0
+        planner.add_box_obstacle(size, name, pose)
 
     # #Create a path constraint for the arm
     # #UNCOMMENT FOR THE ORIENTATION CONSTRAINTS PART
@@ -91,15 +114,15 @@ def main():
                 if not use_orien_const:
                     plan = planner.plan_to_pose(goal_1, list())
                 else:
-                    plan = planner.plan_to_pose(goal_1, list(), orien_const)
+                    plan = planner.plan_to_pose(goal_1, [orien_const])
 
                 raw_input("Press <Enter> to move the right arm to goal pose 1: ")
-                
-                # if not my_controller.execute_path(plan):
-                #     raise Exception("Execution failed")
-
-                if not planner.execute_plan(plan):
-                    raise Exception("Execution failed")
+                if open_loop_contro:
+                    if not my_controller.execute_path(plan):
+                        raise Exception("Execution failed")
+                else:
+                    if not planner.execute_plan(plan):
+                        raise Exception("Execution failed")
             except Exception as e:
                 print e
             else:
@@ -126,13 +149,19 @@ def main():
                 if not use_orien_const:
                     plan = planner.plan_to_pose(goal_2, list())
                 else:
-                    plan = planner.plan_to_pose(goal_2, list(), orien_const)
+                    plan = planner.plan_to_pose(goal_2, [orien_const])
 
                 raw_input("Press <Enter> to move the right arm to goal pose 2: ")
+                if open_loop_contro:
+                    if not my_controller.execute_path(plan):
+                        raise Exception("Execution failed")
+                else:
+                    if not planner.execute_plan(plan):
+                        raise Exception("Execution failed")
                 # if not my_controller.execute_path(plan):
                 #     raise Exception("Execution failed")
-                if not planner.execute_plan(plan):
-                    raise Exception("Execution failed")
+                # if not planner.execute_plan(plan):
+                #     raise Exception("Execution failed")
             except Exception as e:
                 print e
             else:
@@ -158,15 +187,21 @@ def main():
                 if not use_orien_const:
                     plan = planner.plan_to_pose(goal_3, list())
                 else:
-                    plan = planner.plan_to_pose(goal_3, list(), orien_const)
+                    plan = planner.plan_to_pose(goal_3, [orien_const])
 
                 raw_input("Press <Enter> to move the right arm to goal pose 3: ")
+                if open_loop_contro:
+                    if not my_controller.execute_path(plan):
+                        raise Exception("Execution failed")
+                else:
+                    if not planner.execute_plan(plan):
+                        raise Exception("Execution failed")
 
                 # if not my_controller.execute_path(plan):
                 #     raise Exception("Execution failed")
 
-                if not planner.execute_plan(plan):
-                    raise Exception("Execution failed")
+                # if not planner.execute_plan(plan):
+                #     raise Exception("Execution failed")
             except Exception as e:
                 print e
             else:

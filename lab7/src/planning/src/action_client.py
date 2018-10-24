@@ -46,15 +46,17 @@ def main():
     '''
     # goal.request.start_state.joint_state.position = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
     # goal.request.start_state.joint_state.velocity = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-    position = raw_input("please input %d start position for " + str(joint_names) %len(joint_names))
+    position = raw_input("please input %d start position for " %(len(joint_names),) + str(joint_names))
     position =  position.split()
     while (not (len(position) == len(joint_names))):
-        position = raw_input("please input %d start position for " + str(joint_names)%len(joint_names))
+        print("error")
+        position = raw_input("please input %d start position for " %(len(joint_names),) + str(joint_names))
         position =  position.split()
-    velocity = raw_input("please input %d start position for " + str(joint_names)%len(joint_names))
+    velocity = raw_input("please input %d start velocity for " %(len(joint_names),) + str(joint_names))
     velocity =  velocity.split()
     while (not (len(velocity) == len(joint_names))):
-        velocity = raw_input("please input %d start velocity for " + str(joint_names)%len(joint_names))
+        print("error")
+        velocity = raw_input("please input %d start velocity for " %(len(joint_names),) + str(joint_names))
         velocity =  velocity.split()
 
     position = [float(position[i]) for i in range(len(position))]
@@ -77,10 +79,10 @@ def main():
     changed by zishu yu start
     '''
     # target_joint_angles = [0.5, -0.1, 0.1, 0.1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-    target_joint_angles = raw_input("please input %d end position for " + str(joint_names)%len(arm_joint_names))
+    target_joint_angles = raw_input("please input %d end position for "%(len(arm_joint_names), )+ str(joint_names))
     target_joint_angles =  target_joint_angles.split()
     while (not (len(target_joint_angles) == len(arm_joint_names))):
-        target_joint_angles = raw_input("please input %d end position for " + str(joint_names)%len(arm_joint_names))
+        target_joint_angles = raw_input("please input %d end position for "%(len(arm_joint_names),) + str(joint_names))
         target_joint_angles =  target_joint_angles.split()
     target_joint_angles = [float(target_joint_angles[i]) for i in range(len(target_joint_angles))]
     

@@ -198,8 +198,22 @@ class Controller(object):
         current_position = np.array(self._limb.joint_angles().values()).squeeze()
         current_velocity = np.array(self._limb.joint_velocities().values()).squeeze()
 
-        target_position = np.array(self._path.joint_trajectory.points[self._curIndex].positions)
-        target_velocity = np.array(self._path.joint_trajectory.points[self._curIndex].velocities)
+        if self._curIndex < self._maxIndex:
+            time_low = self._path.joint_trajectory.points[self._curIndex].time_from_start.to_sec()
+            time_high = self._path.joint_trajectory.points[self._curIndex+1].time_from_start.to_sec()
+
+            target_position_low = np.array(self._path.joint_trajectory.points[self._curIndex].positions)
+            target_velocity_low = np.array(self._path.joint_trajectory.points[self._curIndex].velocities)
+
+            target_position_high = np.array(self._path.joint_trajectory.points[self._curIndex+1].positions)
+            target_velocity_high = np.array(self._path.joint_trajectory.points[self._curIndex+1].velocities)
+
+            target_position = target_position_low + (t - time_low)/(time_high - time_low)*(target_position_high - target_position_low)
+            target_velocity = target_velocity_low + (t - time_low)/(time_high - time_low)*(target_velocity_high - target_velocity_low)
+
+        else:
+            target_position = np.array(self._path.joint_trajectory.points[self._curIndex].positions)
+            target_velocity = np.array(self._path.joint_trajectory.points[self._curIndex].velocities)
 
         # For Plotting
         self._times.append(t)
