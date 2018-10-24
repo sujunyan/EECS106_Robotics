@@ -31,10 +31,10 @@
         output="screen">
 
     <param name="frames/fixed" value="$(arg fixed_frame)" />
-    <param name="frames/sensor" value="$(arg sensor_frame)" />
+    <param name="frames/sensor" value="$(arg sensor_frame)"/>
 
     <param name="topics/vis" value="$(arg vis_topic)" />
-    <param name="topics/sensor" value="$(arg sensor_topic)" />
+    <param name="topics/sensor" value="$(arg sensor_topic)"/>
 
     <param name="x/num" value="$(arg x_num)" />
     <param name="x/min" value="$(arg x_min)" />
