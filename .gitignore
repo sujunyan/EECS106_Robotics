@@ -5,4 +5,5 @@ Baxter_SDK
 *.pdf
 *.gv
 extra_lib
+lab6/src/ar_track_alvar/
 
