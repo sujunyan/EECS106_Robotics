@@ -14,6 +14,7 @@ from geometry_msgs.msg import Point
 from std_msgs.msg import ColorRGBA
 
 import numpy as np
+import math
 
 class OccupancyGrid2d(object):
     def __init__(self):
@@ -54,11 +55,14 @@ class OccupancyGrid2d(object):
         self._x_num = rospy.get_param("~x/num")
         self._x_min = rospy.get_param("~x/min")
         self._x_max = rospy.get_param("~x/max")
-        # -- self._x_res # The resolution in x. Note: This isn't a ROS parameter. What will you do instead?
+
+        self._x_res = (self._x_max - self._x_min)/self._x_num # The resolution in x. Note: This isn't a ROS parameter. What will you do instead?
+
         self._y_num = rospy.get_param("~y/num");
         self._y_min = rospy.get_param("~y/min");
         self._y_max = rospy.get_param("~y/max");
-        # -- self._y_res # The resolution in y. Note: This isn't a ROS parameter. What will you do instead?
+        self._y_res = (self._y_max - self._y_min)/self._y_num# The resolution in y. Note: This isn't a ROS parameter. What will you do instead?
+
 
         # Update parameters.
         if not rospy.has_param("~update/occupied"):
@@ -148,6 +152,11 @@ class OccupancyGrid2d(object):
             # Get angle of this ray in fixed frame.
             # TODO!
 
+            angle = msg.angle_min + msg.angle_increment * idx ## angle in rad
+            if (angle > msg.angle_max or angle < msg.angle_min):
+                continue
+            angle += yaw # the heading of the turtlebot
+
             # Throw out this point if it is too close or too far away.
             if r > msg.range_max:
                 rospy.logwarn("%s: Range %f > %f was too large.",
@@ -163,7 +172,21 @@ class OccupancyGrid2d(object):
             # Only update each voxel once.
             # The occupancy grid is stored in self._map
             # TODO!
+            terminate_x = r * math.cos(angle)
+            terminate_y = r * math.sin(angle)
+            (Voxel_x,Voxel_y) = self.PointToVoxel(terminate_x,terminate_y)
+            self._map[Voxel_x][Voxel_y] += self._occupied_update # update the terminate point 
+            if (self._map[Voxel_x][Voxel_y] > self._occupied_threshold):
+                self._map[Voxel_x][Voxel_y] = self._occupied_threshold
+            # go along the ray that is free
+            for i in range(1,min(Voxel_x,self._x_num)):
+                j = min(int(i * abs(math.tan(angle))),self._y_num - 1)
+                self._map[i][j] += self._free_update
+                if(self._map[i][j] < self._free_threshold):
+                    self._map[i][j] = self._free_threshold
 
+
+        print("SensorCallback End")
         # Visualize.
         self.Visualize()
 
