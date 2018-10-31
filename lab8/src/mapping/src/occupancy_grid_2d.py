@@ -172,15 +172,26 @@ class OccupancyGrid2d(object):
             # Only update each voxel once.
             # The occupancy grid is stored in self._map
             # TODO!
-            terminate_x = r * math.cos(angle)
-            terminate_y = r * math.sin(angle)
+            terminate_x = r * math.cos(angle) + sensor_x
+            terminate_y = r * math.sin(angle) + sensor_y
             (Voxel_x,Voxel_y) = self.PointToVoxel(terminate_x,terminate_y)
+            (Voxel_sensor_x,Vexol_sensor_y) = self.PointToVoxel(sensor_x,sensor_y)
             self._map[Voxel_x][Voxel_y] += self._occupied_update # update the terminate point 
             if (self._map[Voxel_x][Voxel_y] > self._occupied_threshold):
                 self._map[Voxel_x][Voxel_y] = self._occupied_threshold
             # go along the ray that is free
-            for i in range(1,min(Voxel_x,self._x_num)):
-                j = min(int(i * abs(math.tan(angle))),self._y_num - 1)
+            if Voxel_sensor_x < min( Voxel_x , self._x_num):
+                step =  1
+            else:
+                step = -1
+
+            for i in range(Voxel_sensor_x , min( Voxel_x , self._x_num),step):
+                j = Vexol_sensor_y + int( (i - Voxel_sensor_x)  * (math.tan(angle)))
+                if (j < 0):
+                    j = 0
+                elif j >= self._y_num:
+                    j = self._y_num -1
+
                 self._map[i][j] += self._free_update
                 if(self._map[i][j] < self._free_threshold):
                     self._map[i][j] = self._free_threshold
