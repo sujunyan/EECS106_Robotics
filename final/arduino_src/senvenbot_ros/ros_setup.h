@@ -11,9 +11,6 @@
 #include <string.h>
 #include <Arm7Bot.h>
 
-// the command Subscriber to listen to the action command from the PC
-void cmdCallBack(const std_msgs::Float64& cmd_msg);
-//void cmdCallBack(const sensor_msgs::JointState & cmd_msg);
 void ros_setup();
 void ros_loop();
 

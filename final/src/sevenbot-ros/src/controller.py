@@ -29,7 +29,7 @@ def controller():
 
   #Create a publisher and a tf buffer, which is primed with a tf listener
   #pub = rospy.Publisher('7bot/joint_cmd', Float64MultiArray, queue_size=10) ## TODO maybe wrong and need to modify
-  pub = rospy.Publisher('7bot/joint_cmd', JointState, queue_size=10) ## TODO maybe wrong and need to modify
+  pub = rospy.Publisher('sevenbot/joint_cmd', JointState, queue_size=10) ## TODO maybe wrong and need to modify
 
 #  tfBuffer = tf2_ros.Buffer()
 #  tfListener = tf2_ros.TransformListener(tfBuffer)
