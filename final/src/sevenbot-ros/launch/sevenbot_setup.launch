@@ -1,0 +1,20 @@
+
+<launch>
+    <!--  -->
+  <!-- Mapper node. -->
+  <node name="serial_node"
+        pkg="rosserial_arduino"
+        type="serial_node.py"
+        output="screen">
+
+    <param name="port" value="/dev/ttyACM0" />
+  </node>
+
+  <node name = "control_node"
+    pkg="sevenbot-ros"
+    type="controller.py">
+  </node>
+  <!--
+-->
+
+</launch>
