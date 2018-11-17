@@ -4,7 +4,7 @@ Arm7Bot arm;
 void setup() {
   // initial 7Bot Arm
   arm.initialMove();
-  //arm.forcelessMode();
+  arm.forcelessMode();
   ros_setup();
 }
 
@@ -12,5 +12,5 @@ void loop() {
   // update the state
   arm.updatePos();
   ros_loop();
-  delay(100);
+  delay(1);
 }
