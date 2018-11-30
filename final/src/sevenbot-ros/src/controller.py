@@ -36,7 +36,7 @@ def controller():
 
   # Create a timer object that will sleep long enough to result in
   # a 10Hz publishing rate
-  r = rospy.Rate(1) # 10hz
+  r = rospy.Rate(0.5) # 1hz
 
   # Loop until the node is killed with Ctrl-C
   flag = 1
@@ -54,9 +54,10 @@ def controller():
       #print x_err,y_err
       #print control_command
       if flag:
-        joint_array = [70,115,65,90,90,90,0]
+        joint_array = [70,115,50,90,90,90,0]
       else:
-        joint_array = [110,115,65,90,90,90,0]
+        joint_array = [70,115,80,90,90,90,0]
+        pass
       flag = not flag
 
       joint_cmd = JointState()

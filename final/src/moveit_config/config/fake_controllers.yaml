@@ -1,0 +1,8 @@
+controller_list:
+  - name: fake_sevenbot_arm_controller
+    joints:
+      - j1
+      - j2
+      - j3
+      - j4
+      - j6

@@ -12,5 +12,5 @@ void loop() {
   // update the state
   arm.updatePos();
   ros_loop();
-  delay(1);
+  //delay(1);
 }

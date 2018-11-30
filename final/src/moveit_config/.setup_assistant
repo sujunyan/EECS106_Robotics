@@ -1,0 +1,11 @@
+moveit_setup_assistant_config:
+  URDF:
+    package: sevenbot-ros
+    relative_path: urdf/sevenbot.urdf
+    xacro_args: ""
+  SRDF:
+    relative_path: config/sevenbot.srdf
+  CONFIG:
+    author_name: JunyanSu
+    author_email: sujy@berkeley.edu
+    generated_timestamp: 1543604707
