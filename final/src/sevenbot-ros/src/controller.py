@@ -13,54 +13,82 @@ import sys
 #from geometry_msgs.msg import Twist
 from std_msgs.msg import Float64MultiArray
 from sensor_msgs.msg import JointState
+from math import *
+
+# Inverse Kinematics for sevenbot from official github
+# Input : translate from base_link to goal position
+def IK(trans):
+  # constant config for sevenbot
+  a=120.0; b=40.0; c=198.50; d=30.05; e=77.80; f=22.10; g=12.0; h = 29.42;
+  PI = pi
+  (x,y,z) = trans
+  theta = [0,0,0]
+  theta[0] = atan(y / x);
+  if (theta[0] < 0):
+    theta[0] = PI + theta[0];
+  x -= d * cos(theta[0]);
+  y -= d * sin(theta[0]);
+  z -= e;
+  lengthA = sqrt(x * x + y * y + z * z);
+  lengthC = sqrt(h * h + c * c);
+  offsetAngle = atan(h / c);
+  angleA = acos( (a * a + lengthC * lengthC - lengthA * lengthA) / (2 * a * lengthC) );
+  angleB = atan( z / sqrt(x * x + y * y) );
+  angleC = acos( (a * a + lengthA * lengthA - lengthC * lengthC) / (2 * a * lengthA) );
+  theta[1] = angleB + angleC;
+  theta[2] = PI - angleA - angleB - angleC + offsetAngle;
+  theta[2] += 1.134464;
+
+  # range check
+  thetaMin = [ 0,  0, -1.134464,  0.17453292,  0,  0, 0];
+  thetaMax = [PI, PI, 2.0071287, 2.9670596, PI, PI, PI/2];
+  if (theta[1] > thetaMin[1] and theta[1] < thetaMax[1] and
+      theta[2] > thetaMin[2] and theta[2] < thetaMax[2]
+      and theta[2] - 0.8203047 + theta[1] < PI and theta[2] + theta[1] > 1.44862327):
+      print theta
+      return theta
+  return None
+
+
 
 #Define the method which contains the main functionality of the node.
-def controller():
-  """
-  Controls a turtlebot whose position is denoted by turtlebot_frame,
-  to go to a position denoted by target_frame
-
-  Inputs:
-  - turtlebot_frame: the tf frame of the AR tag on your turtlebot
-  - target_frame: the tf frame of the target AR tag
-  """
-
-  ################################### YOUR CODE HERE ##############
-
-  #Create a publisher and a tf buffer, which is primed with a tf listener
-  #pub = rospy.Publisher('7bot/joint_cmd', Float64MultiArray, queue_size=10) ## TODO maybe wrong and need to modify
+def controller(name ,cur_frame,goal_frame):
+  #pub = rospy.Publisher('sevenbot/joint_cmd', JointState, queue_size=10) ## TODO maybe wrong and need to modify
   pub = rospy.Publisher('sevenbot/joint_cmd', JointState, queue_size=10) ## TODO maybe wrong and need to modify
-
-#  tfBuffer = tf2_ros.Buffer()
-#  tfListener = tf2_ros.TransformListener(tfBuffer)
-
-  # Create a timer object that will sleep long enough to result in
-  # a 10Hz publishing rate
-  r = rospy.Rate(0.5) # 1hz
+  tfBuffer = tf2_ros.Buffer()
+  tfListener = tf2_ros.TransformListener(tfBuffer)
+  r = rospy.Rate(2) # 1hz
 
   # Loop until the node is killed with Ctrl-C
   flag = 1
   while not rospy.is_shutdown():
     try:
-      #trans = tfBuffer.lookup_transform(goal_frame , turtlebot_frame , rospy.Time())
-      ## Process trans to get your state error
-      ## Generate a control command to send to the robot
-      ##print trans.transform
-      #x_err = trans.transform.translation.x
-      #y_err = trans.transform.translation.y
-      #control_command = Twist()
-      #control_command.linear.x = x_err * K1;
-      #control_command.angular.z = y_err * K2;
-      #print x_err,y_err
-      #print control_command
+      trans = tfBuffer.lookup_transform(goal_frame , cur_frame , rospy.Time(0))
+      #print trans.transform
+      pos = [trans.transform.translation.x,trans.transform.translation.y,trans.transform.translation.z]
+      pos = [1000 * i for i in pos]
+      print pos
+      try:
+        theta = IK(pos)
+      except:
+        print ("IK failed")
+        continue
+      if(not theta):
+        print ("IK failed")
+        continue
+      print theta
+
       if flag:
         joint_array = [70,115,50,90,90,90,0]
       else:
         joint_array = [70,115,80,90,90,90,0]
-        pass
       flag = not flag
+      #joint_array = theta + [radians(i) for i in joint_array[3:]]
+      joint_array = [degrees(i) for i in theta] + joint_array[3:]
+      print joint_array
 
       joint_cmd = JointState()
+      joint_cmd.header.stamp = rospy.Time.now()
       #joint_cmd.layout.dim = [7]
 
       joint_cmd.position = joint_array
@@ -86,6 +114,6 @@ if __name__ == '__main__':
   rospy.init_node('sevenbot_controller', anonymous=True)
 
   try:
-    controller()
+    controller("controller","base_link","goal_frame")
   except rospy.ROSInterruptException:
     pass

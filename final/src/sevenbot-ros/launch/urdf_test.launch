@@ -18,9 +18,15 @@
 
   <node name = "publisher"
     pkg="sevenbot-ros"
-    type="joint_state_publisher.py">
+    type="joint_state_converter.py">
   </node>
 
+  <node name = "controller"
+    pkg="sevenbot-ros"
+    type="controller.py"
+    output="screen"
+    >
+  </node>
   <!--
 -->
 
@@ -41,4 +47,6 @@
       <param name="publish_frequency" value="50.0"/>
   </node>
 
+  <!-- <node pkg="tf" type="static_transform_publisher" name="link1_broadcaster" args="0.1 0.0 0 0 0 0 1 base_link goal_frame 100" />
+-->
 </launch>
