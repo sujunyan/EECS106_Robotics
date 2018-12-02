@@ -57,7 +57,7 @@ def controller(name ,cur_frame,goal_frame):
   pub = rospy.Publisher('sevenbot/joint_cmd', JointState, queue_size=10) ## TODO maybe wrong and need to modify
   tfBuffer = tf2_ros.Buffer()
   tfListener = tf2_ros.TransformListener(tfBuffer)
-  r = rospy.Rate(2) # 1hz
+  r = rospy.Rate(0.2) # 1hz
 
   # Loop until the node is killed with Ctrl-C
   flag = 1
@@ -81,10 +81,10 @@ def controller(name ,cur_frame,goal_frame):
       if flag:
         joint_array = [70,115,50,90,90,90,0]
       else:
-        joint_array = [70,115,80,90,90,90,0]
+        joint_array = [70,115,80,90,90,90,180]
       flag = not flag
       #joint_array = theta + [radians(i) for i in joint_array[3:]]
-      joint_array = [degrees(i) for i in theta] + joint_array[3:]
+      #joint_array = [degrees(i) for i in theta] + joint_array[3:]
       print joint_array
 
       joint_cmd = JointState()

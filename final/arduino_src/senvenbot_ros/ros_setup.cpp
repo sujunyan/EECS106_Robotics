@@ -1,6 +1,7 @@
 
 #include "ros_setup.h"
 #include "cstdlib"
+#include "Servo.h"
 
 ros::NodeHandle  nh;
 
@@ -47,22 +48,26 @@ void ros_loop(){
     state_pub.publish(&joint_state);
   }
 
-  // subscribe the control every 10ms
+  // subscribe the control every 50ms
   if (millis() - g_control_timer >= 10){
     g_control_timer = millis();
     nh.spinOnce();
   }
 }
 
-void cmdCallBack(const sensor_msgs::JointState & cmd_msg){
 
-    #if 1
+extern int gripper_position;
+void cmdCallBack(const sensor_msgs::JointState & cmd_msg){
     double angles[SERVO_NUM];
     //joint_state.position[i] = float(arm.posD[i]);
-    for (size_t i = 0; i < SERVO_NUM; i++) {
+    // TODO the last servo is modified so we need to treat it seperately.
+    for (size_t i = 0; i < SERVO_NUM ; i++) {
       angles[i] = cmd_msg.position[i];
     }
     arm.move(angles);
-    #endif
+
+    //TODO cannot call the servo.write function inside this
+    //gripper_position = int(cmd_msg.position[SERVO_NUM-1]);
+
 
 }
