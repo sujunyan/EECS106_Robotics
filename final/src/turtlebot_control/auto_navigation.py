@@ -33,11 +33,15 @@ class NavTest():
         # that was used to launch RViz.
         locations = dict()
 
-        trans = self.frametrans('object_1green_1', 'map')
+    def move_bot(self, target_frame)
+
+        trans = self.frametrans(target_frame, 'map')
         if trans == False:
             return 
+        
         locations['part_green'] = Pose(Point(trans.transform.translation.x,
                                         trans.transform.translation.y, 0.0), Quaternion(0.0, 0.0, 0.0, 1.0))
+
         # locations['hall_foyer'] = Pose(Point(1.714, 0.515, 0.000),
         #                                Quaternion(0.000, 0.000, -0.309, 0.951))
         # locations['hall_kitchen'] = Pose(Point(-0.809, -2.141, 0.000),
@@ -196,7 +200,9 @@ def trunc(f, n):
 
 if __name__ == '__main__':
     try:
-        NavTest()
+        new_nav = NavTest()
+        new_nav.
+
         rospy.spin()
     except rospy.ROSInterruptException:
         rospy.loginfo("AMCL navigation test finished.")

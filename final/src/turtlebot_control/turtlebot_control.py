@@ -29,7 +29,7 @@ class Controller:
         self.odometry = Odometry()
         self.init_odometry = Odometry()
 
-    def controller(self, turtlebot_frame, goal_frame):
+    def controller_rot(self, turtlebot_frame, goal_frame):
         """
         Controls a turtlebot whose position is denoted by turtlebot_frame,
         to go to a position denoted by target_frame
@@ -385,6 +385,7 @@ class Controller:
         # rospy.spin()
 
 
+            position = self.odometry.pose.pose.position
 # This is Python's sytax for a main() method, which is run by default
 # when exectued in the shell
 if __name__ == '__main__':
@@ -407,6 +408,8 @@ if __name__ == '__main__':
     # 	rotate(speed, angle, clockwise)
     control = Controller()
     # control.rotate(40,90, -1)
-    control.controller('base_link', 'object_1green_1')
-    #control.go_straight(0.2, 0.4, -1)
+    
+    control.controller_rot('base_link', 'object_1green_1')
+
+    # control.go_straight(0.2, 0.4, -1)
     # control.rotate_radians(0.785398163397, 0.401055162969, -1)
