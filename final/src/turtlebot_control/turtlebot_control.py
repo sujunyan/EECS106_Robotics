@@ -29,7 +29,7 @@ class Controller:
         self.odometry = Odometry()
         self.init_odometry = Odometry()
 
-    def controller_rot(self, turtlebot_frame, goal_frame):
+    def controller(self, turtlebot_frame, goal_frame):
         """
         Controls a turtlebot whose position is denoted by turtlebot_frame,
         to go to a position denoted by target_frame
@@ -40,6 +40,9 @@ class Controller:
         """
 
         ################################### YOUR CODE HERE ##############
+
+        # Create a NavTest instance
+        new_nav = NavTest()
 
         # Create a publisher and a tf buffer, which is primed with a tf listener
         # pub = rospy.Publisher('/cmd_vel_mux/input/teleop', Twist, queue_size=10) ## TODO maybe wrong and need to modify
@@ -102,18 +105,32 @@ class Controller:
 
                 # pub.publish(control_command)
             except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
-                print "tf errors occur"
+
                 fail_time += 1
+
+
                 if (not finded_check and fail_time % 5 == 4):
-                    self.rotate(40, 30, 1)
-                    r_rotation.sleep()
-                control_command = Twist()
-                control_command.linear.x = 0
-                control_command.linear.y = 0
-                control_command.linear.z = 0
-                control_command.angular.x = 0
-                control_command.angular.y = 0
-                control_command.angular.z = 0
+                    try:
+                        new_nav.move_bot_straight(0.4, 1)
+                    except ValueError:
+                        rot_angle = 30
+                        self.rotate(rot_angle/4, rot_angle, 1)
+                        r_rotation.sleep()
+
+                # print "tf errors occur"
+                # fail_time += 1
+                # if (not finded_check and fail_time % 5 == 4):
+                #     self.rotate(40, 30, 1)
+                #     r_rotation.sleep()
+
+                # control_command = Twist()
+                # control_command.linear.x = 0
+                # control_command.linear.y = 0
+                # control_command.linear.z = 0
+                # control_command.angular.x = 0
+                # control_command.angular.y = 0
+                # control_command.angular.z = 0
+                
                 pub.publish(control_command)
             # Use our rate object to sleep until it is time to publish again
             r.sleep()
@@ -384,8 +401,6 @@ class Controller:
         return math.sqrt((init_position.x - position.x)**2 + (init_position.y - position.y)**2)
         # rospy.spin()
 
-
-            position = self.odometry.pose.pose.position
 # This is Python's sytax for a main() method, which is run by default
 # when exectued in the shell
 if __name__ == '__main__':
@@ -409,7 +424,7 @@ if __name__ == '__main__':
     control = Controller()
     # control.rotate(40,90, -1)
     
-    control.controller_rot('base_link', 'object_1green_1')
+    control.controller('base_link', 'object_1green_1')
 
     # control.go_straight(0.2, 0.4, -1)
     # control.rotate_radians(0.785398163397, 0.401055162969, -1)

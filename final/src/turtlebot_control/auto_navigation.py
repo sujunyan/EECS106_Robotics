@@ -8,6 +8,7 @@ from math import pow, sqrt
 
 import tf2_ros
 import sys
+import math
 
 
 class NavTest():
@@ -25,7 +26,7 @@ class NavTest():
         goal_states = ['PENDING', 'ACTIVE', 'PREEMPTED', 'SUCCEEDED',
                        'ABORTED', 'REJECTED', 'PREEMPTING', 'RECALLING',
                        'RECALLED', 'LOST']
-        sequence = 'part_green'
+        sequence = ['target']
         # Set up the goal locations. Poses are defined in the map frame.
         # An easy way to find the pose coordinates is to point-and-click
         # Nav Goals in RViz when running in the simulator.
@@ -33,34 +34,42 @@ class NavTest():
         # that was used to launch RViz.
         locations = dict()
 
-    def move_bot(self, target_frame)
+    def move_bot_frame(self, target_frame):
 
         trans = self.frametrans(target_frame, 'map')
         if trans == False:
-            return 
+            return
         
-        locations['part_green'] = Pose(Point(trans.transform.translation.x,
+        locations['target'] = Pose(Point(trans.transform.translation.x,
                                         trans.transform.translation.y, 0.0), Quaternion(0.0, 0.0, 0.0, 1.0))
 
-        # locations['hall_foyer'] = Pose(Point(1.714, 0.515, 0.000),
-        #                                Quaternion(0.000, 0.000, -0.309, 0.951))
-        # locations['hall_kitchen'] = Pose(Point(-0.809, -2.141, 0.000),
-        #                                  Quaternion(0.000, 0.000, -0.816, 0.578))
-        # locations['hall_bedroom'] = Pose(Point(3.457, -1.495, 0.000),
-        #                                  Quaternion(0.000, 0.000, -0.003, 1.000))
-        #
-        # locations['hall_foyer'] = Pose(Point(1.719, 0.409, 0.000),
-        #                        Quaternion(0.000, 0.000, 0.468, 0.884))
-        # locations['hall_kitchen'] = Pose(Point(0.856, 2.858, 0.000),
-        #                           Quaternion(0.000, 0.000, 0.192, 0.981))
-        # locations['hall_bedroom'] = Pose(Point(1.781, 1.856, 0.000),
-        #                           Quaternion(0.000, 0.000, 0.000, 1.000))
-        # locations['living_room_1'] = Pose(Point(0.720, 2.229, 0.000),
-        # Quaternion(0.000, 0.000, 0.786, 0.618))
-        # locations['living_room_2'] = Pose(Point(1.471, 1.007, 0.000),
-        # Quaternion(0.000, 0.000, 0.480, 0.877))
-        # locations['dining_room_1'] = Pose(Point(-0.861, -0.019, 0.000),
-        # Quaternion(0.000, 0.000, 0.892, -0.451))
+        self.move_bot(locations)
+
+    def move_bot_straight(self, dist, direc):
+        
+        trans = self.frametrans('base_link', 'map')
+        if trans == False:
+            return
+
+        linear_pos  = trans.transform.translation
+        orientation = trans.transform.rotation
+        dist_x = direc*dist*math.cos(orientation.z)
+        dist_y = direc*dist*math.sin(orientation.z)
+
+        if abs(direction) == 1:
+            new_target_point = Point(linear_pos.x + dist_x,
+                                     linear_pos.y + dist_y,
+                                     linear_pos.z)
+        else:
+            print 'Must specify if moving forward or backward'
+            return
+
+        locations['target'] = Pose(new_target_point, orientation)
+
+        self.move_bot(locations)
+
+
+    def move_bot(self, locations):
 
         # Publisher to manually control the robot (e.g. to stop it)
         self.cmd_vel_pub = rospy.Publisher('cmd_vel', Twist, queue_size=5)
@@ -136,9 +145,12 @@ class NavTest():
         rospy.loginfo("Going to: " + str(location))
         # Start the robot toward the next location
         self.move_base.send_goal(self.goal)
-        # Allow 5 minutes to get there
+        # Allow 1 minute to get there
         finished_within_time = self.move_base.wait_for_result(
-            rospy.Duration(300))
+            rospy.Duration(60))
+        # # Allow 5 minutes to get there
+        # finished_within_time = self.move_base.wait_for_result(
+        #     rospy.Duration(300))
         # Check for success or failure
         if not finished_within_time:
             self.move_base.cancel_goal()
@@ -152,6 +164,7 @@ class NavTest():
             else:
                 rospy.loginfo(
                     "Goal failed with error code: " + str(goal_states[state]))
+                raise ValueError('Failed goal')
         # How long have we been running?
         running_time = rospy.Time.now() - start_time
         running_time = running_time.secs / 60.0
@@ -161,6 +174,7 @@ class NavTest():
         rospy.loginfo("Running time: " + str(trunc(running_time, 1)) +
                       " min Distance: " + str(trunc(distance_traveled, 1)) + " m")
         # rospy.sleep(self.rest_time)  
+
     def update_initial_pose(self, initial_pose):
         self.initial_pose = initial_pose
 
@@ -201,7 +215,7 @@ def trunc(f, n):
 if __name__ == '__main__':
     try:
         new_nav = NavTest()
-        new_nav.
+        new_nav.move_bot_frame('object_1green_1')
 
         rospy.spin()
     except rospy.ROSInterruptException:
