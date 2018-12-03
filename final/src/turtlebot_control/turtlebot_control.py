@@ -13,9 +13,19 @@ import math
 
 from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry
-from auto_navigation import NavTest
+# from auto_navigation import NavTest
+
+# Numerical value of pi
 PI = 3.1415926535897
 
+# Current relative angle, initializing at zero
+ang_current = 0
+
+# Angular step to rotate by during an autonomous search for the target
+rot_angle = 30
+
+# # Create a NavTest instance
+# new_nav = NavTest()
 
 class Controller:
     # Define the method which contains the main functionality of the node.
@@ -25,6 +35,7 @@ class Controller:
             '/mobile_base/commands/velocity', Twist, queue_size=10)
         self.odometry_subscriber = rospy.Subscriber(
             '/odom', Odometry, self.update_odometry)
+        self.move_forward_publisher =
         self.odometry_init_check = False
         self.odometry = Odometry()
         self.init_odometry = Odometry()
@@ -40,9 +51,6 @@ class Controller:
         """
 
         ################################### YOUR CODE HERE ##############
-
-        # Create a NavTest instance
-        new_nav = NavTest()
 
         # Create a publisher and a tf buffer, which is primed with a tf listener
         # pub = rospy.Publisher('/cmd_vel_mux/input/teleop', Twist, queue_size=10) ## TODO maybe wrong and need to modify
@@ -111,10 +119,25 @@ class Controller:
 
                 if (not finded_check and fail_time % 5 == 4):
                     try:
-                        new_nav.move_bot_straight(0.4, 1)
-                    except ValueError:
-                        rot_angle = 30
+                        ang_current += rot_angle
                         self.rotate(rot_angle/4, rot_angle, 1)
+
+                        if ang_current == 360:
+
+                            # Reset the current angle to zero
+                            ang_current = 0
+
+                            # Attempt to move the turtlebot straight
+                            new_nav.move_bot_straight(0.4, 1)
+
+                    except ValueError:
+
+                        # If the navigation fails (e.g., turtlebot hits a wall), rotate and try another goal
+                        self.rotate(rot_angle/4, rot_angle, 1)
+
+                        # Attempt to move the turtlebot straight
+                        new_nav.move_bot_straight(0.4, 1)
+
                         r_rotation.sleep()
 
                 # print "tf errors occur"
@@ -410,6 +433,8 @@ if __name__ == '__main__':
     # Run this program as a new node in the ROS computation graph
     # called /turtlebot_controller.
     rospy.init_node('turtlebot_controller', anonymous=True)
+    rospy.on_shutdown(self.shutdown)
+
 
     # try:
     #   controller(sys.argv[1], sys.argv[2])

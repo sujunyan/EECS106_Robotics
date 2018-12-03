@@ -14,7 +14,7 @@ import math
 
 class NavTest():
     def __init__(self):
-        # rospy.init_node('nav_turtlebot', anonymous=True)
+        rospy.init_node('nav_turtlebot', anonymous=True)
         rospy.on_shutdown(self.shutdown)
 
         # How long in seconds should the robot pause at each location?
@@ -41,8 +41,37 @@ class NavTest():
         self.move_base.wait_for_server(rospy.Duration(60))
         rospy.loginfo("Connected to move base server")
 
+        # Get the initial pose from the user
+        #rospy.loginfo("Click on the map in RViz to set the intial pose...")
+        #rospy.wait_for_message('initialpose', PoseWithCovarianceStamped)
+        trans = self.frametrans('base_link', 'map')
+        if trans == False:
+            return
+
+        # Get the initial pose from the user
+        rospy.loginfo("Click on the map in RViz to set the intial pose...")
+        rospy.wait_for_message('initialpose', PoseWithCovarianceStamped)
+
+        self.last_location = Pose()
+
+        rospy.Subscriber('initialpose', PoseWithCovarianceStamped, self.update_initial_pose)
+        # Make sure we have the initial pose
+        while self.initial_pose.header.stamp == "":
+            rospy.sleep(1)
+        rospy.loginfo("Starting navigation test")
+
+        # self.initial_pose.pose.pose.position.x = trans.transform.translation.x
+        # self.initial_pose.pose.pose.position.y = trans.transform.translation.y
+        # self.initial_pose.pose.pose.position.z = trans.transform.translation.z
+
+        # self.initial_pose.pose.pose.orientation.x = trans.transform.rotation.x
+        # self.initial_pose.pose.pose.orientation.y = trans.transform.rotation.y
+        # self.initial_pose.pose.pose.orientation.z = trans.transform.rotation.z
+        # self.initial_pose.pose.pose.orientation.w = trans.transform.rotation.w
+
+        #rospy.Subscriber('initialpose', PoseWithCovarianceStamped, self.update_initial_pose)
+
         # A variable to hold the initial pose of the robot to be set by the user in RViz
-        initial_pose = PoseWithCovarianceStamped()
 
     def move_bot_frame(self, target_frame):
 
@@ -73,7 +102,7 @@ class NavTest():
         dist_x = direc*dist*math.cos(orientation.z)
         dist_y = direc*dist*math.sin(orientation.z)
 
-        if abs(direction) == 1:
+        if abs(direc) == 1:
             new_target_point = Point(linear_pos.x + dist_x,
                                      linear_pos.y + dist_y,
                                      linear_pos.z)
@@ -105,27 +134,6 @@ class NavTest():
         running_time = 0
         location = ""
         last_location = ""
-        # Get the initial pose from the user
-        #rospy.loginfo("Click on the map in RViz to set the intial pose...")
-        #rospy.wait_for_message('initialpose', PoseWithCovarianceStamped)
-        trans = self.frametrans('base_link', 'map')
-        if trans == False:
-            return 
-        initial_pose.pose.pose.position.x = trans.transform.translation.x
-        initial_pose.pose.pose.position.y = trans.transform.translation.y
-        initial_pose.pose.pose.position.z = trans.transform.translation.z
-
-        initial_pose.pose.pose.orientation.x = trans.transform.rotation.x
-        initial_pose.pose.pose.orientation.y = trans.transform.rotation.y
-        initial_pose.pose.pose.orientation.z = trans.transform.rotation.z
-        initial_pose.pose.pose.orientation.w = trans.transform.rotation.w
-
-        self.last_location = Pose()
-        #rospy.Subscriber('initialpose', PoseWithCovarianceStamped, self.update_initial_pose)
-        # Make sure we have the initial pose
-        while initial_pose.header.stamp == "":
-            rospy.sleep(1)
-        rospy.loginfo("Starting navigation test")
 
         # Begin the main loop and run through a self.sequence of locations
 
@@ -133,7 +141,7 @@ class NavTest():
         location = self.sequence[0]
          # Keep track of the distance traveled.
          # Use updated initial pose if available.
-        if initial_pose.header.stamp == "":
+        if self.initial_pose.header.stamp == "":
             distance = sqrt(pow(locations[location].position.x
                                   - locations[last_location].position.x, 2) +
                               pow(locations[location].position.y -
@@ -141,10 +149,10 @@ class NavTest():
         else:
             rospy.loginfo("Updating current pose.")
             distance = sqrt(pow(locations[location].position.x
-                                - initial_pose.pose.pose.position.x, 2) +
+                                - self.initial_pose.pose.pose.position.x, 2) +
                             pow(locations[location].position.y -
-                                initial_pose.pose.pose.position.y, 2))
-            initial_pose.header.stamp = ""
+                                self.initial_pose.pose.pose.position.y, 2))
+            self.initial_pose.header.stamp = ""
         
         # Set up the next goal location
         self.goal = MoveBaseGoal()
@@ -174,7 +182,7 @@ class NavTest():
             else:
                 rospy.loginfo(
                     "Goal failed with error code: " + str(self.goal_states[state]))
-                raise ValueError('Failed goal')
+                raise ValueError('Failed goal --> Likely hit a wall')
         # How long have we been running?
         running_time = rospy.Time.now() - start_time
         running_time = running_time.secs / 60.0
@@ -225,7 +233,8 @@ def trunc(f, n):
 if __name__ == '__main__':
     try:
         new_nav = NavTest()
-        new_nav.move_bot_frame('object_1green_1')
+        # new_nav.move_bot_frame('object_1green_1')
+        new_nav.move_bot_straight(0.4, 1)
 
         rospy.spin()
     except rospy.ROSInterruptException:
