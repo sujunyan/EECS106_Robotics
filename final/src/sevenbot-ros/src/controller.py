@@ -22,6 +22,7 @@ def IK(trans):
   a=120.0; b=40.0; c=198.50; d=30.05; e=77.80; f=22.10; g=12.0; h = 29.42;
   PI = pi
   (x,y,z) = trans
+  print (x,y,z)
   theta = [0,0,0]
   theta[0] = atan(y / x);
   if (theta[0] < 0):
@@ -42,6 +43,7 @@ def IK(trans):
   # range check
   thetaMin = [ 0,  0, -1.134464,  0.17453292,  0,  0, 0];
   thetaMax = [PI, PI, 2.0071287, 2.9670596, PI, PI, PI/2];
+  print theta
   if (theta[1] > thetaMin[1] and theta[1] < thetaMax[1] and
       theta[2] > thetaMin[2] and theta[2] < thetaMax[2]
       and theta[2] - 0.8203047 + theta[1] < PI and theta[2] + theta[1] > 1.44862327):
@@ -103,6 +105,66 @@ def controller(name ,cur_frame,goal_frame):
     r.sleep()
 
 
+
+pub = rospy.Publisher('sevenbot/joint_cmd', JointState, queue_size=10) ## TODO maybe wrong and need to modify
+
+first_position = [91.94244384765625, 179.35252380371094, 46.40287780761719, 93.45323944091797, 180.0, 1.726618766784668, 90]
+second_position = [92.37409973144531, 140.2877655029297, 42.30215835571289, 87.19424438476562, 180.0, 1.5107914209365845, 90]
+third_position = [92.80575561523438, 117.48201751708984, 61.2230224609375, 87.41007232666016, 175.0, 1.72, 90]
+#third_position = [90, 104.78, 71.66, 87.41007232666016, 180, 1.51, 90]
+
+#
+#Define the method which contains the main functionality of the node.
+def controller_wo_frame():
+  r = rospy.Rate(1) # 1hz
+  desire_joint = [102.3021,99.928,71.6546,89.78,179.568,7.1223,90]
+  joint_array = [101,180,45,96,180,10,90]
+  joint_array[0] = desire_joint[0]
+  pushlish_times = 5
+  joint_cmd = JointState()
+  for i in range(pushlish_times):
+    joint_cmd.header.stamp = rospy.Time.now()
+    joint_cmd.position = first_position
+    pub.publish(joint_cmd)
+    r.sleep()
+  print "first joint done"
+
+  for i in range(pushlish_times):
+    joint_cmd.header.stamp = rospy.Time.now()
+    joint_cmd.position = second_position
+    pub.publish(joint_cmd)
+    r.sleep()
+
+  print "second joint done"
+
+  for i in range(pushlish_times):
+    joint_cmd.header.stamp = rospy.Time.now()
+    joint_cmd.position = third_position
+    pub.publish(joint_cmd)
+    r.sleep()
+  print "third joint done"
+  print "entering the infinite loop"
+
+
+  while not rospy.is_shutdown():
+    try:
+      #joint_array = [102.3021,99.928,71.6546,89.78,179.568,7.1223,90]
+      print joint_cmd.position
+
+      joint_cmd.header.stamp = rospy.Time.now()
+      #joint_cmd.layout.dim = [7]
+      #joint_cmd.position = joint_array
+
+
+      #################################### end your code ###############
+
+      pub.publish(joint_cmd)
+    except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
+      print "tf errors occur"
+    # Use our rate object to sleep until it is time to publish again
+    r.sleep()
+
+
 # This is Python's sytax for a main() method, which is run by default
 # when exectued in the shell
 if __name__ == '__main__':
@@ -112,8 +174,11 @@ if __name__ == '__main__':
   #Run this program as a new node in the ROS computation graph
   #called /turtlebot_controller.
   rospy.init_node('sevenbot_controller', anonymous=True)
+  tmp = IK((0.001,200,200))
+  print [degrees(i) for i in tmp]
 
   try:
-    controller("controller","base_link","goal_frame")
+    pass
+    controller_wo_frame()
   except rospy.ROSInterruptException:
     pass

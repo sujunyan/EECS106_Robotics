@@ -49,7 +49,7 @@ void ros_loop(){
   }
 
   // subscribe the control every 50ms
-  if (millis() - g_control_timer >= 10){
+  if (millis() - g_control_timer >= 1){
     g_control_timer = millis();
     nh.spinOnce();
   }
