@@ -79,12 +79,12 @@ def controller(name ,cur_frame,goal_frame):
       print theta
 
       if flag:
-        joint_array = [70,115,50,90,90,90,0]
+        joint_array = [70,115,50,90,90,90,90]
       else:
-        joint_array = [70,115,80,90,90,90,180]
+        joint_array = [70,115,80,90,90,90,160]
       flag = not flag
       #joint_array = theta + [radians(i) for i in joint_array[3:]]
-      #joint_array = [degrees(i) for i in theta] + joint_array[3:]
+      joint_array = [degrees(i) for i in theta] + joint_array[3:]
       print joint_array
 
       joint_cmd = JointState()
