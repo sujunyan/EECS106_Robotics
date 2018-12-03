@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import rospy
 import actionlib
 from actionlib_msgs.msg import *
@@ -23,27 +24,43 @@ class NavTest():
         self.fake_test = rospy.get_param("~fake_test", False)
 
         # Goal state return values
-        goal_states = ['PENDING', 'ACTIVE', 'PREEMPTED', 'SUCCEEDED',
+        self.goal_states = ['PENDING', 'ACTIVE', 'PREEMPTED', 'SUCCEEDED',
                        'ABORTED', 'REJECTED', 'PREEMPTING', 'RECALLING',
                        'RECALLED', 'LOST']
-        sequence = ['target']
-        # Set up the goal locations. Poses are defined in the map frame.
-        # An easy way to find the pose coordinates is to point-and-click
-        # Nav Goals in RViz when running in the simulator.
-        # Pose coordinates are then displayed in the terminal
-        # that was used to launch RViz.
-        locations = dict()
+        self.sequence = ['target']
+
+        # Publisher to manually control the robot (e.g. to stop it)
+        self.cmd_vel_pub = rospy.Publisher('cmd_vel', Twist, queue_size=5)
+
+        # Subscribe to the move_base action server
+        self.move_base = actionlib.SimpleActionClient(
+            "move_base", MoveBaseAction)
+        rospy.loginfo("Waiting for move_base action server...")
+
+        # Wait 60 seconds for the action server to become available
+        self.move_base.wait_for_server(rospy.Duration(60))
+        rospy.loginfo("Connected to move base server")
+
+        # A variable to hold the initial pose of the robot to be set by the user in RViz
+        initial_pose = PoseWithCovarianceStamped()
 
     def move_bot_frame(self, target_frame):
 
         trans = self.frametrans(target_frame, 'map')
         if trans == False:
             return
+
+        # Set up the goal locations. Poses are defined in the map frame.
+        # An easy way to find the pose coordinates is to point-and-click
+        # Nav Goals in RViz when running in the simulator.
+        # Pose coordinates are then displayed in the terminal
+        # that was used to launch RViz.
+        locations = dict()
         
         locations['target'] = Pose(Point(trans.transform.translation.x,
                                         trans.transform.translation.y, 0.0), Quaternion(0.0, 0.0, 0.0, 1.0))
 
-        self.move_bot(locations)
+        self.move_bot()
 
     def move_bot_straight(self, dist, direc):
         
@@ -64,6 +81,13 @@ class NavTest():
             print 'Must specify if moving forward or backward'
             return
 
+        # Set up the goal locations. Poses are defined in the map frame.
+        # An easy way to find the pose coordinates is to point-and-click
+        # Nav Goals in RViz when running in the simulator.
+        # Pose coordinates are then displayed in the terminal
+        # that was used to launch RViz.
+        locations = dict()
+
         locations['target'] = Pose(new_target_point, orientation)
 
         self.move_bot(locations)
@@ -71,20 +95,6 @@ class NavTest():
 
     def move_bot(self, locations):
 
-        # Publisher to manually control the robot (e.g. to stop it)
-        self.cmd_vel_pub = rospy.Publisher('cmd_vel', Twist, queue_size=5)
-
-        # Subscribe to the move_base action server
-        self.move_base = actionlib.SimpleActionClient(
-            "move_base", MoveBaseAction)
-        rospy.loginfo("Waiting for move_base action server...")
-
-        # Wait 60 seconds for the action server to become available
-        self.move_base.wait_for_server(rospy.Duration(60))
-        rospy.loginfo("Connected to move base server")
-
-        # A variable to hold the initial pose of the robot to be set by the user in RViz
-        initial_pose = PoseWithCovarianceStamped()
         # Variables to keep track of success rate, running time, and distance traveled
         n_locations = len(locations)
         n_goals = 1
@@ -117,10 +127,10 @@ class NavTest():
             rospy.sleep(1)
         rospy.loginfo("Starting navigation test")
 
-        # Begin the main loop and run through a sequence of locations
+        # Begin the main loop and run through a self.sequence of locations
 
-        # Get the next location in the current sequence
-        location = sequence[0]
+        # Get the next location in the current self.sequence
+        location = self.sequence[0]
          # Keep track of the distance traveled.
          # Use updated initial pose if available.
         if initial_pose.header.stamp == "":
@@ -163,7 +173,7 @@ class NavTest():
                 distance_traveled += distance
             else:
                 rospy.loginfo(
-                    "Goal failed with error code: " + str(goal_states[state]))
+                    "Goal failed with error code: " + str(self.goal_states[state]))
                 raise ValueError('Failed goal')
         # How long have we been running?
         running_time = rospy.Time.now() - start_time
