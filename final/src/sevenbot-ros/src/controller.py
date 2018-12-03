@@ -110,8 +110,8 @@ pub = rospy.Publisher('sevenbot/joint_cmd', JointState, queue_size=10) ## TODO m
 
 first_position = [91.94244384765625, 179.35252380371094, 46.40287780761719, 93.45323944091797, 180.0, 1.726618766784668, 90]
 second_position = [92.37409973144531, 140.2877655029297, 42.30215835571289, 87.19424438476562, 180.0, 1.5107914209365845, 90]
-third_position = [92.80575561523438, 117.48201751708984, 61.2230224609375, 87.41007232666016, 175.0, 1.72, 90]
-#third_position = [90, 104.78, 71.66, 87.41007232666016, 180, 1.51, 90]
+#third_position = [92.80575561523438, 117.48201751708984, 61.2230224609375, 87.41007232666016, 175.0, 1.72, 90]
+third_position = [90, 104.78, 71.66, 87.41007232666016, 180, 1.51, 90]
 
 #
 #Define the method which contains the main functionality of the node.
@@ -158,6 +158,7 @@ def controller_wo_frame():
 
       #################################### end your code ###############
 
+      joint_cmd.position = third_position
       pub.publish(joint_cmd)
     except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
       print "tf errors occur"
