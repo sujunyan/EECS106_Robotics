@@ -49,13 +49,16 @@ int red_iLowH = 0;
 int red_iHighH = 34;
 int red_iLowS = 136;
 int red_iHighS = 255;
-int red_iLowV = 104;
+int red_iLowV = 78;
 int red_iHighV = 255;
+
+bool image_show_open;
 
 using namespace find_object;
 
 bool gui;
 std::string settingsPath;
+
 
 void my_handler_gui(int s){
 	QApplication::closeAllWindows();
@@ -87,6 +90,7 @@ int main(int argc, char** argv)
 	ros::init(argc, argv, "find_object_2d");
 
 	gui = true;
+	image_show_open = true;
 	std::string objectsPath;
 	std::string sessionPath;
 	settingsPath = QDir::homePath().append("/.ros/find_object_2d.ini").toStdString();
@@ -99,13 +103,14 @@ int main(int argc, char** argv)
 	nh.param("session_path", sessionPath, sessionPath);
 	nh.param("settings_path", settingsPath, settingsPath);
 	nh.param("subscribe_depth", subscribeDepth, subscribeDepth);
-
+	nh.param("image_show_open", image_show_open, image_show_open);
+	
 	ROS_INFO("gui=%d", (int)gui);
 	ROS_INFO("objects_path=%s", objectsPath.c_str());
 	ROS_INFO("session_path=%s", sessionPath.c_str());
 	ROS_INFO("settings_path=%s", settingsPath.c_str());
 	ROS_INFO("subscribe_depth = %s", subscribeDepth?"true":"false");
-
+	ROS_INFO("image_show_open=%d", (int)image_show_open);
 	// if(settingsPath.empty())
 	// {
 	// 	settingsPath = QDir::homePath().append("/.ros/find_object_2d.ini").toStdString();

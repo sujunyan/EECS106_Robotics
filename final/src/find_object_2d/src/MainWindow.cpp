@@ -1163,35 +1163,35 @@ void MainWindow::startProcessing()
 	}
 	if(camera_->start())
 	{
-		connect(camera_, SIGNAL(imageReceived(const cv::Mat &)), this, SLOT(update(const cv::Mat &)), Qt::UniqueConnection);
-		connect(camera_, SIGNAL(finished()), this, SLOT(stopProcessing()), Qt::UniqueConnection);
-		ui_->actionStop_camera->setEnabled(true);
-		ui_->actionPause_camera->setEnabled(true);
-		ui_->actionStart_camera->setEnabled(false);
-		ui_->actionLoad_scene_from_file->setEnabled(false);
-		ui_->actionCamera_from_directory_of_images->setEnabled(false);
-		ui_->actionCamera_from_video_file->setEnabled(false);
-		ui_->actionCamera_from_TCP_IP->setEnabled(false);
-		ui_->label_timeRefreshRate->setVisible(true);
+		// connect(camera_, SIGNAL(imageReceived(const cv::Mat &)), this, SLOT(update(const cv::Mat &)), Qt::UniqueConnection);
+		// connect(camera_, SIGNAL(finished()), this, SLOT(stopProcessing()), Qt::UniqueConnection);
+		// ui_->actionStop_camera->setEnabled(true);
+		// ui_->actionPause_camera->setEnabled(true);
+		// ui_->actionStart_camera->setEnabled(false);
+		// ui_->actionLoad_scene_from_file->setEnabled(false);
+		// ui_->actionCamera_from_directory_of_images->setEnabled(false);
+		// ui_->actionCamera_from_video_file->setEnabled(false);
+		// ui_->actionCamera_from_TCP_IP->setEnabled(false);
+		// ui_->label_timeRefreshRate->setVisible(true);
 
-		//update control bar
-		ui_->pushButton_play->setVisible(false);
-		ui_->pushButton_pause->setVisible(true);
-		ui_->pushButton_stop->setEnabled(true);
-		int totalFrames = camera_->getTotalFrames();
-		if(totalFrames>0)
-		{
-			ui_->label_frame->setVisible(true);
-			ui_->horizontalSlider_frames->setEnabled(true);
-			ui_->horizontalSlider_frames->setMaximum(totalFrames-1);
-		}
+		// //update control bar
+		// ui_->pushButton_play->setVisible(false);
+		// ui_->pushButton_pause->setVisible(true);
+		// ui_->pushButton_stop->setEnabled(true);
+		// int totalFrames = camera_->getTotalFrames();
+		// if(totalFrames>0)
+		// {
+		// 	ui_->label_frame->setVisible(true);
+		// 	ui_->horizontalSlider_frames->setEnabled(true);
+		// 	ui_->horizontalSlider_frames->setMaximum(totalFrames-1);
+		// }
 
-		//update camera port if TCP is used
-		ui_->label_port_image->setText("-");
-		if(Settings::getCamera_6useTcpCamera() && camera_->getPort())
-		{
-			ui_->label_port_image->setNum(camera_->getPort());
-		}
+		// //update camera port if TCP is used
+		// ui_->label_port_image->setText("-");
+		// if(Settings::getCamera_6useTcpCamera() && camera_->getPort())
+		// {
+		// 	ui_->label_port_image->setNum(camera_->getPort());
+		// }
 
 		if(updateStatusMessage)
 		{

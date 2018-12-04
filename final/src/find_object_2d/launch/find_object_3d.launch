@@ -4,6 +4,7 @@
 	
 	<node name="find_object_3d" pkg="find_object_2d" type="find_object_2d" output="screen">
 		<param name="gui" value="true" type="bool"/>
+		<param name="image_show_open" value="true" type="bool"/>
 		<param name="settings_path" value="~/.ros/find_object_2d.ini" type="str"/>
 		<param name="subscribe_depth" value="true" type="bool"/>
 		<param name="objects_path" value="/home/cc/ee106a/fa18/class/ee106a-afj/ros_workspace/EECS106_Robotics/final_project/image_detect" type="str"/>

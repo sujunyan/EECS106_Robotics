@@ -306,7 +306,10 @@ vector< vector<Point> > color_based_find_object(const cv::Mat &imgOriginal, int 
 	Canny(imgThresholded, canny_output, thresh, thresh * 2, 3);
 	/// Find contours
 	findContours(canny_output, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
-	imshow(name, imgThresholded); //show the thresholded image
+	extern bool image_show_open;
+	if (image_show_open){
+		imshow(name, imgThresholded); //show the thresholded image
+	}
 	return contours;
 }
 
@@ -327,29 +330,30 @@ void FindObjectROS::detect(const cv::Mat &imgOriginal)
 	extern int red_iHighS;
 	extern int red_iLowV;
 	extern int red_iHighV;
+	extern bool image_show_open;
 	vector< vector<Point> > green_contours;
 	vector< vector<Point> > red_contours;
 	int thresh = 100;
 	RNG rng(12345);
-	
-	namedWindow("Control_green", CV_WINDOW_AUTOSIZE); //create a window called "Control_green"
-	//Create trackbars in "Control_green" window by zishu
-	cvCreateTrackbar("LowH", "Control_green", &iLowH, 179); //Hue (0 - 179)
-	cvCreateTrackbar("HighH", "Control_green", &iHighH, 179);
-	cvCreateTrackbar("LowS", "Control_green", &iLowS, 255); //Saturation (0 - 255)
-	cvCreateTrackbar("HighS", "Control_green", &iHighS, 255);
-	cvCreateTrackbar("LowV", "Control_green", &iLowV, 255); //Value (0 - 255)
-	cvCreateTrackbar("HighV", "Control_green", &iHighV, 255);
+	if (image_show_open){
+		namedWindow("Control_green", CV_WINDOW_AUTOSIZE); //create a window called "Control_green"
+		//Create trackbars in "Control_green" window by zishu
+		cvCreateTrackbar("LowH", "Control_green", &iLowH, 179); //Hue (0 - 179)
+		cvCreateTrackbar("HighH", "Control_green", &iHighH, 179);
+		cvCreateTrackbar("LowS", "Control_green", &iLowS, 255); //Saturation (0 - 255)
+		cvCreateTrackbar("HighS", "Control_green", &iHighS, 255);
+		cvCreateTrackbar("LowV", "Control_green", &iLowV, 255); //Value (0 - 255)
+		cvCreateTrackbar("HighV", "Control_green", &iHighV, 255);
 
-	namedWindow("Control_red", CV_WINDOW_AUTOSIZE); //create a window called "Control_red"
-	//Create trackbars in "Control" window by zishu
-	cvCreateTrackbar("LowH", "Control_red", &red_iLowH, 179); //Hue (0 - 179)
-	cvCreateTrackbar("HighH", "Control_red", &red_iHighH, 179);
-	cvCreateTrackbar("LowS", "Control_red", &red_iLowS, 255); //Saturation (0 - 255)
-	cvCreateTrackbar("HighS", "Control_red", &red_iHighS, 255);
-	cvCreateTrackbar("LowV", "Control_red", &red_iLowV, 255); //Value (0 - 255)
-	cvCreateTrackbar("HighV", "Control_red", &red_iHighV, 255);
-
+		namedWindow("Control_red", CV_WINDOW_AUTOSIZE); //create a window called "Control_red"
+		//Create trackbars in "Control" window by zishu
+		cvCreateTrackbar("LowH", "Control_red", &red_iLowH, 179); //Hue (0 - 179)
+		cvCreateTrackbar("HighH", "Control_red", &red_iHighH, 179);
+		cvCreateTrackbar("LowS", "Control_red", &red_iLowS, 255); //Saturation (0 - 255)
+		cvCreateTrackbar("HighS", "Control_red", &red_iHighS, 255);
+		cvCreateTrackbar("LowV", "Control_red", &red_iLowV, 255); //Value (0 - 255)
+		cvCreateTrackbar("HighV", "Control_red", &red_iHighV, 255);
+	}
 	// Mat imgHSV;
 
 	// cvtColor(imgOriginal, imgHSV, COLOR_BGR2HSV); //Convert the captured frame from BGR to HSV
@@ -510,9 +514,9 @@ void FindObjectROS::detect(const cv::Mat &imgOriginal)
 		rectangle(imgOriginal, red_boundRect[i].tl(), red_boundRect[i].br(), color, 2, 8, 0);
 	}
 	}
-	
-	imshow("Original", imgOriginal);			 //show the original image
-
+	if (image_show_open){
+		imshow("Original", imgOriginal);			 //show the original image
+	}
 	/// Show in a window
 	// namedWindow("Contours", CV_WINDOW_AUTOSIZE);
 	// imshow("Contours", drawing);
