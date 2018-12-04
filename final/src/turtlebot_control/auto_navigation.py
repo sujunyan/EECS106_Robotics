@@ -4,6 +4,7 @@ import actionlib
 from actionlib_msgs.msg import *
 from geometry_msgs.msg import Pose, PoseWithCovarianceStamped, Point, Quaternion, Twist
 from std_msgs.msg import Bool
+from nav_msgs.msg import Odometry
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
 from random import sample
 from math import pow, sqrt
@@ -19,7 +20,7 @@ class NavTest():
         rospy.on_shutdown(self.shutdown)
 
         # Distance to move forward
-        self.dist_mv_fwd = 0.4
+        self.dist_mv_fwd = 1    # [m]
 
         # How long in seconds should the robot pause at each location?
         self.rest_time = rospy.get_param("~rest_time", 10)
@@ -32,6 +33,12 @@ class NavTest():
                        'ABORTED', 'REJECTED', 'PREEMPTING', 'RECALLING',
                        'RECALLED', 'LOST']
         self.sequence = ['target']
+
+        # self.odometry_subscriber = rospy.Subscriber(
+        #     '/odom', Odometry, self.update_initial_pose)
+
+        self.init_pose_sub = rospy.Subscriber(
+            'initialpose', PoseWithCovarianceStamped, self.update_initial_pose)
 
         # Publisher to manually control the robot (e.g. to stop it)
         self.cmd_vel_pub = rospy.Publisher(
@@ -61,9 +68,16 @@ class NavTest():
         # if trans == False:
         #     return
 
+        # self.initial_pose = Pose()
         self.initial_pose = PoseWithCovarianceStamped()
 
-        # Get the initial pose from the user
+        # self.initial_pose = self.frametrans('odom', 'map')
+        # if self.initial_pose == False:
+        #     return
+
+        # rospy.loginfo("Obtained initial pose from odometry")
+
+        # # Get the initial pose from the user
         rospy.loginfo("Click on the map in RViz to set the intial pose...")
         rospy.wait_for_message('initialpose', PoseWithCovarianceStamped)
 
@@ -78,8 +92,6 @@ class NavTest():
         # self.initial_pose.pose.pose.orientation.y = 0
         # self.initial_pose.pose.pose.orientation.z = 0
         # self.initial_pose.pose.pose.orientation.w = 1
-
-        rospy.Subscriber('initialpose', PoseWithCovarianceStamped, self.update_initial_pose)
 
         # Make sure we have the initial pose
         while self.initial_pose.header.stamp == "":
@@ -139,50 +151,50 @@ class NavTest():
         # Nav Goals in RViz when running in the simulator.
         # Pose coordinates are then displayed in the terminal
         # that was used to launch RViz.
-        locations = dict()
+        # location = []
 
         rospy.loginfo('Forward movement goal commanded')
 
-        locations['target'] = Pose(new_target_point, orientation)
+        location = Pose(new_target_point, orientation)
 
-    #     self.move_bot(locations)
+        self.move_bot(location)
 
-    # def move_bot(self, locations):
+    def move_bot(self, location):
 
         # Variables to keep track of success rate, running time, and distance traveled
-        n_locations = len(locations)
+        # n_locations = len(locations)
         n_goals = 1
         n_successes = 0
-        i = n_locations
+        # i = n_locations
         distance_traveled = 0
         start_time = rospy.Time.now()
         running_time = 0
-        location = ""
-        last_location = "target"
+        # location = ""
         # last_location = ""
 
         # Begin the main loop and run through a self.sequence of locations
 
         # Get the next location in the current self.sequence
-        location = self.sequence[0]
+        # location = self.sequence[0]
+        last_location = location
          # Keep track of the distance traveled.
          # Use updated initial pose if available.
-        if self.initial_pose.header.stamp == "":
-            distance = sqrt(pow(locations[location].position.x
-                                  - locations[last_location].position.x, 2) +
-                              pow(locations[location].position.y -
-                                  locations[last_location].position.y, 2))
-        else:
-            rospy.loginfo("Updating current pose.")
-            distance = sqrt(pow(locations[location].position.x
-                                - self.initial_pose.pose.pose.position.x, 2) +
-                            pow(locations[location].position.y -
-                                self.initial_pose.pose.pose.position.y, 2))
-            self.initial_pose.header.stamp = ""
+        # if self.initial_pose.header.stamp == "":
+        #     distance = sqrt(pow(location.position.x
+        #                           - location.position.x, 2) +`
+        #                       pow(location.position.y -
+        #                           location.position.y, 2))
+        # else:
+        rospy.loginfo("Updating current pose.")
+        distance = sqrt(pow(location.position.x
+                            - self.initial_pose.pose.pose.position.x, 2) +
+                        pow(location.position.y -
+                            self.initial_pose.pose.pose.position.y, 2))
+        # self.initial_pose.header.stamp = ""
         
         # Set up the next goal location
         self.goal = MoveBaseGoal()
-        self.goal.target_pose.pose = locations[location]
+        self.goal.target_pose.pose = location
         self.goal.target_pose.header.frame_id = 'map'
         self.goal.target_pose.header.stamp = rospy.Time.now()
 
@@ -199,7 +211,7 @@ class NavTest():
         # Tell the controller that the goal was attempted
         attempt_goal = Bool()
         attempt_goal.data = True
-        self.attempt_goal_pub.publish(attempted_goal)
+        self.attempt_goal_pub.publish(attempt_goal)
 
         # finished_within_time = self.move_base.wait_for_result(
         #     rospy.Duration(300))
@@ -234,8 +246,10 @@ class NavTest():
                       " min Distance: " + str(trunc(distance_traveled, 1)) + " m")
         # rospy.sleep(self.rest_time)  
 
-    def update_initial_pose(self, initial_pose):
-        self.initial_pose = initial_pose
+    def update_initial_pose(self, init_pose):
+        self.initial_pose = init_pose
+        # self.initial_pose = Pose()
+        # self.initial_pose = odom.pose.pose
 
     def shutdown(self):
         rospy.loginfo("Stopping the robot...")

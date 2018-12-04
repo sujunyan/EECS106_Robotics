@@ -34,7 +34,7 @@ class Controller:
         self.rot_angle = 30
 
         # Angular step to rotate by during an autonomous search for the target
-        self.rot_speed = 60
+        self.rot_speed = 40
 
         self.odometry_init_check = False
         self.odometry = Odometry()
@@ -115,9 +115,9 @@ class Controller:
 
                 self.r_rotation.sleep()
 
-                # self.r_rotation.sleep()
+                self.r_rotation.sleep()
 
-                # self.r_rotation.sleep()
+                self.r_rotation.sleep()
 
                 # control_command = Twist()
                 # control_command.linear.x = 0
@@ -144,7 +144,13 @@ class Controller:
 
                 fail_time += 1
 
+                print self.ang_current
+
                 if (not finded_check and fail_time % 2 == 1):
+
+                    # Reset the fail time
+                    fail_time = 0
+
                     # Increment the current angle counter
                     self.ang_current += self.rot_angle
 
@@ -166,7 +172,7 @@ class Controller:
                     # Publish the zero velocity control command
                     self.velocity_publisher.publish(control_command)
 
-                    if self.ang_current == 360:
+                    if self.ang_current >= 360:
 
                         # Reset the current angle to zero
                         self.ang_current = 0
@@ -179,7 +185,7 @@ class Controller:
                         # Wait until we hear the goal has been attempted to proceed
                         rospy.wait_for_message('/custom_goal/attempt', Bool)
 
-                        self.r_forward.sleep()
+                        self.r_forward.sleep()   2 rospy.sleep(10.)
 
             # Use our rate object to sleep until it is time to publish again
             r.sleep()
@@ -203,7 +209,7 @@ class Controller:
         # If the navigation fails (e.g., turtlebot hits a wall)
         # while attempting to move forward, rotate and try another goal
         # after rotating by a certain angle
-        self.ang_current = 0
+        # self.ang_current = 0
         self.rotate(self.rot_speed, self.rot_angle, 1)
         self.r_rotation.sleep()
 
