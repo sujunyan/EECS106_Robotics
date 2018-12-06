@@ -127,37 +127,38 @@ class NavTest():
 
     #     self.move_bot()
 
-    def move_bot_straight(self, __):
+    def move_bot_straight(self, forward):
         
-        trans = self.frametrans('base_link', 'map')
-        if trans == False:
-            return
+        if forward.data == True:
+            trans = self.frametrans('base_link', 'map')
+            if trans == False:
+                return
 
-        linear_pos  = trans.transform.translation
-        orientation = trans.transform.rotation
-        dist_x = self.dist_mv_fwd*math.cos(orientation.z)
-        dist_y = self.dist_mv_fwd*math.sin(orientation.z)
+            linear_pos  = trans.transform.translation
+            orientation = trans.transform.rotation
+            dist_x = self.dist_mv_fwd*math.cos(orientation.z)
+            dist_y = self.dist_mv_fwd*math.sin(orientation.z)
 
-        # if abs(direc) == 1:
-        new_target_point = Point(linear_pos.x + dist_x,
-                                 linear_pos.y + dist_y,
-                                 linear_pos.z)
-        # else:
-        #     print 'Must specify if moving forward or backward'
-        #     return
+            # if abs(direc) == 1:
+            new_target_point = Point(linear_pos.x + dist_x,
+                                     linear_pos.y + dist_y,
+                                     linear_pos.z)
+            # else:
+            #     print 'Must specify if moving forward or backward'
+            #     return
 
-        # Set up the goal locations. Poses are defined in the map frame.
-        # An easy way to find the pose coordinates is to point-and-click
-        # Nav Goals in RViz when running in the simulator.
-        # Pose coordinates are then displayed in the terminal
-        # that was used to launch RViz.
-        # location = []
+            # Set up the goal locations. Poses are defined in the map frame.
+            # An easy way to find the pose coordinates is to point-and-click
+            # Nav Goals in RViz when running in the simulator.
+            # Pose coordinates are then displayed in the terminal
+            # that was used to launch RViz.
+            # location = []
 
-        rospy.loginfo('Forward movement goal commanded')
+            rospy.loginfo('Forward movement goal commanded')
 
-        location = Pose(new_target_point, orientation)
+            location = Pose(new_target_point, orientation)
 
-        self.move_bot(location)
+            self.move_bot(location)
 
     def move_bot(self, location):
 
