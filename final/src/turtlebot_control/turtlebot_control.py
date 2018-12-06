@@ -462,7 +462,7 @@ class Controller:
                     vel_msg.angular.z = 20 * 2*PI/360 * clockwise
             self.velocity_publisher.publish(vel_msg)
             # print("here")
-            # r.sleep()
+            r.sleep()
             orientation = self.odometry.pose.pose.orientation
             current_z = math.atan2(orientation.w * orientation.z + orientation.x *
                                    orientation.y, 1 - 2*(orientation.y**2 + orientation.z**2))
