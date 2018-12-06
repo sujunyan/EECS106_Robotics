@@ -62,25 +62,23 @@ class NavTest():
         self.move_base.wait_for_server(rospy.Duration(60))
         rospy.loginfo("Connected to move base server")
 
-        # # Get the initial pose from the user
-        # #rospy.loginfo("Click on the map in RViz to set the intial pose...")
-        # trans = self.frametrans('base_link', 'map')
-        # if trans == False:
-        #     return
-
         # self.initial_pose = Pose()
         self.initial_pose = PoseWithCovarianceStamped()
 
-        # self.initial_pose = self.frametrans('odom', 'map')
-        # if self.initial_pose == False:
-        #     return
+        # Try to get the initial pose before asking the user to select it in rviz
+        # This avoids messing up the Amcl Particle Swarm.
+        test_frame = self.frametrans('base_link', 'map')
+        if test_frame == False:
+
+            # # Get the initial pose from the user
+            rospy.loginfo("Click on the map in RViz to set the intial pose...")
+            rospy.wait_for_message('initialpose', PoseWithCovarianceStamped)
+
+            # return
 
         # rospy.loginfo("Obtained initial pose from odometry")
 
-        # # Get the initial pose from the user
-        rospy.loginfo("Click on the map in RViz to set the intial pose...")
-        rospy.wait_for_message('initialpose', PoseWithCovarianceStamped)
-
+        # Initialize a last known pose of the turtlebot.
         self.last_location = Pose()
         
         # # Guess the initial pose is at the map frame with no rotation
@@ -93,11 +91,6 @@ class NavTest():
         # self.initial_pose.pose.pose.orientation.z = 0
         # self.initial_pose.pose.pose.orientation.w = 1
 
-        # Make sure we have the initial pose
-        while self.initial_pose.header.stamp == "":
-            rospy.sleep(1)
-        rospy.loginfo("Starting navigation test")
-
         # self.initial_pose.pose.pose.position.x = trans.transform.translation.x
         # self.initial_pose.pose.pose.position.y = trans.transform.translation.y
         # self.initial_pose.pose.pose.position.z = trans.transform.translation.z
@@ -106,6 +99,11 @@ class NavTest():
         # self.initial_pose.pose.pose.orientation.y = trans.transform.rotation.y
         # self.initial_pose.pose.pose.orientation.z = trans.transform.rotation.z
         # self.initial_pose.pose.pose.orientation.w = trans.transform.rotation.w
+
+        # Make sure we have the initial pose
+        while self.initial_pose.header.stamp == "":
+            rospy.sleep(1)
+        rospy.loginfo("Starting navigation test")
 
     # def move_bot_frame(self, target_frame):
 
@@ -160,6 +158,12 @@ class NavTest():
 
             self.move_bot(location)
 
+        elif forward.data == False:
+
+            # Stop the turtlebot from moving if we tell it to stop moving forward
+            # This makes velocity commands override goal commands.
+            self.shutdown()
+
     def move_bot(self, location):
 
         # Variables to keep track of success rate, running time, and distance traveled
@@ -178,6 +182,7 @@ class NavTest():
         # Get the next location in the current self.sequence
         # location = self.sequence[0]
         last_location = location
+
          # Keep track of the distance traveled.
          # Use updated initial pose if available.
         # if self.initial_pose.header.stamp == "":
@@ -191,7 +196,7 @@ class NavTest():
                             - self.initial_pose.pose.pose.position.x, 2) +
                         pow(location.position.y -
                             self.initial_pose.pose.pose.position.y, 2))
-        # self.initial_pose.header.stamp = ""
+        self.initial_pose.header.stamp = ""
         
         # Set up the next goal location
         self.goal = MoveBaseGoal()

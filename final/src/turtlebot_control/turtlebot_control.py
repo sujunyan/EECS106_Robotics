@@ -19,9 +19,6 @@ from std_msgs.msg import Bool, String
 # Numerical value of pi
 PI = 3.1415926535897
 
-# # Create a NavTest instance
-# new_nav = NavTest()
-
 class Controller:
     # Define the method which contains the main functionality of the node.
 
@@ -36,22 +33,19 @@ class Controller:
         # Angular step to rotate by during an autonomous search for the target
         self.rot_speed = 40
 
+        self.velocity_publisher = rospy.Publisher(
+            '/mobile_base/commands/velocity', Twist, queue_size=10)
+        self.odometry_subscriber = rospy.Subscriber(
+            '/odom', Odometry, self.update_odometry)
+        # self.to_7bot_publisher = rospy.Publisher(
+        #     '/controller_2_7bot', String, queue_size=10)
+        # self.from_7bot_subscriber = rospy.Subscriber(
+        #     '/7bot_2_controller', String, self.update_7bot_status)
         self.odometry_init_check = False
         self.odometry = Odometry()
         self.init_odometry = Odometry()
 
-        self.velocity_publisher = rospy.Publisher(
-            '/mobile_base/commands/velocity', Twist, queue_size=10)
-
-        self.odometry_subscriber = rospy.Subscriber(
-            '/odom', Odometry, self.update_odometry)
-
-        # self.to_7bot_publisher = rospy.Publisher(
-        #     '/controller_2_7bot', String, queue_size=10)
-
-        # self.from_7bot_subscriber = rospy.Subscriber(
-        #     '/7bot_2_controller', String, self.update_7bot_status)
-
+        # Setup publishers and subscribers for autonomous search goal setting
         self.move_forw_pub = rospy.Publisher(
             '/move_forward', Bool, queue_size=10)
 
@@ -76,185 +70,153 @@ class Controller:
         # Create a publisher and a tf buffer, which is primed with a tf listener
         # pub = rospy.Publisher('/cmd_vel_mux/input/teleop', Twist, queue_size=10) ## TODO maybe wrong and need to modify
         # TODO maybe wrong and need to modify
-        # pub = rospy.Publisher('/mobile_base/commands/velocity', Twist, queue_size=10)
+        pub = rospy.Publisher(
+            '/mobile_base/commands/velocity', Twist, queue_size=10)
 
         tfBuffer = tf2_ros.Buffer()
         tfListener = tf2_ros.TransformListener(tfBuffer)
 
         # Create a timer object that will sleep long enough to result in
         # a 10Hz publishing rate
-        r               = rospy.Rate(0.5) # 0.5 hz
-        self.r_rotation = rospy.Rate(0.2) # 0.2 hz
-        # self.r_forward  = rospy.Rate(0.5) # 0.5 Hz
-
-        # K1 = 0.3
-        # K2 = 1
+        self.r = rospy.Rate(0.5)  # 0.5 hz --> Once per 2 sec
+        self.r_rotation = rospy.Rate(0.2) # 0.2 Hz --> Once per 5 sec
+        self.r_forward = rospy.Rate(0.5) # 0.5 Hz --> Once per 2 sec
+        K1 = 0.3
+        K2 = 1
         fail_time = 0
-
         # Loop until the node is killed with Ctrl-C
         finded_check = False
         while not rospy.is_shutdown():
             try:
-                # trans = tfBuffer.lookup_transform(
-                #     goal_frame, turtlebot_frame, rospy.Time(0))
-
                 trans = tfBuffer.lookup_transform(
                      turtlebot_frame, goal_frame, rospy.Time(0))
-
-                # Tell the turtlebot to not move straight while attempting a rotation
-                move_forward = Bool()
-                move_forward.data = False
-                self.move_forw_pub.publish(move_forward)
-
                 x_err = trans.transform.translation.x
                 y_err = trans.transform.translation.y
                 print "x_err", x_err, "y_err", y_err
-                # theta = math.atan2(abs(y_err), abs(x_err))
-                # theta = math.atan2(abs(y_err), abs(x_err))
                 theta = math.atan2(abs(y_err), abs(x_err)) / 2
                 if y_err < 0: 
                     clockwise = 1
                 else:
                     clockwise = -1
-
-                # tolerance = 0.3 * PI / 180
                 tolerance = 1 * PI / 180
-                # self.rotate_radians(PI/4, abs(theta), clockwise)
+                # self.rotate_radians(PI / 4, abs(theta), clockwise)
                 print "break rotate_radians", theta, clockwise, tolerance
                 # break
                 
                 if abs(theta) < tolerance:
                     break
                 else:
-                  # pass
-                    self.rotate_radians(PI/4, abs(theta), clockwise)
-
+                    self.rotate_radians(PI / 4, abs(theta), clockwise)
                 self.r_rotation.sleep()
                 self.r_rotation.sleep()
                 self.r_rotation.sleep()
-
+            except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
+                # print "tf errors occur"
+                # fail_time += 1
+                # if (not finded_check and fail_time % 5 == 4):
+                #     self.rotate(40, 30, 1)
+                #     self.r_rotation.sleep()
                 # control_command = Twist()
                 # control_command.linear.x = 0
                 # control_command.linear.y = 0
                 # control_command.linear.z = 0
                 # control_command.angular.x = 0
                 # control_command.angular.y = 0
-                # print("x_err", x_err, "y_err", y_err)
-                # control_command.linear.x = x_err * K1;
-                # control_command.angular.z = y_err * K2;
-
-                # print x_err, y_err
-                # finded_check = True
-                # #print control_command
-
-                # #################################### end your code ###############
-
+                # control_command.angular.z = 0
                 # pub.publish(control_command)
 
-            # except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
-            #     print "tf errors occur"
-            #     fail_time += 1
-            #     if (not finded_check and fail_time % 5 == 4):
-            #         self.rotate(40, 30, 1)
-            #         self.r_rotation.sleep()
-            #     control_command = Twist()
-            #     control_command.linear.x = 0
-            #     control_command.linear.y = 0
-            #     control_command.linear.z = 0
-            #     control_command.angular.x = 0
-            #     control_command.angular.y = 0
-            #     control_command.angular.z = 0
-            #     self.velocity_publisher.publish(control_command)
-                # Use our rate object to sleep unti
-
-        # self.r_rotation.sleep()
-        # self.r_rotation.sleep()
-
-        # while not rospy.is_shutdown():
-        #     try:
-
-
-
-                # trans = tfBuffer.lookup_transform(
-                #      turtlebot_frame, goal_frame, rospy.Time(0))
-
-                # x_err = trans.transform.translation.x
-                # y_err = trans.transform.translation.y
-                # z_err = trans.transform.translation.z
-
-                print "x_err", x_err, "y_err", y_err
-
-                actual_x_go = self.go_straight(0.2, abs(x_err)-0.1, 1)
-
-                break
-
-            except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
-
-                print "tf errors occur"
-
-                fail_time += 1
-
-                print "current_angle", self.ang_current
-
-                if (not finded_check and fail_time % 5 == 4):
-
-                    # Reset the fail time
-                    fail_time = 0
-
-                    if self.ang_current == 0:
-                        pass
-
-                        # Attempt to move the turtlebot straight
-                        move_forward = Bool()
-                        move_forward.data = True
-                        self.move_forw_pub.publish(move_forward)
-
-                        # Wait until we hear the goal has been attempted to proceed
-                        rospy.wait_for_message('/custom_goal/attempt', Bool)
-
-                        self.r_forward.sleep()
-
-                    elif self.ang_current < 360:
-
-                        # Tell the turtlebot to not move straight while attempting a rotation
-                        move_forward = Bool()
-                        move_forward.data = False
-                        self.move_forw_pub.publish(move_forward)
-
-                        # Increment the current angle counter
-                        self.ang_current += self.rot_angle
-
-                        # Rotate the turtlebot
-                        # self.ang_current = self.rotate(self.rot_speed, self.rot_angle, 1)
-                        self.rotate(self.rot_speed, self.rot_angle, 1)
-                        
-                        # Sleep the rotation timer
-                        self.r_rotation.sleep()
-
-                        # Set the velocity of turtlebot to zero
-                        control_command = Twist()
-                        control_command.linear.x = 0
-                        control_command.linear.y = 0
-                        control_command.linear.z = 0
-                        control_command.angular.x = 0
-                        control_command.angular.y = 0
-                        control_command.angular.z = 0
-
-                        # Publish the zero velocity control command
-                        self.velocity_publisher.publish(control_command)
-
-                    elif self.ang_current >= 360:
-
-                        # Reset the current angle to zero
-                        self.ang_current = 0
-
-                    else:
-
-                        # Tell the user we do not have a
-                        rospy.loginfo('NO VALID CURRENT ANGLE')
+                self.forward_goal()
 
             # Use our rate object to sleep until it is time to publish again
-            r.sleep()
+            self.r.sleep()
+        self.r_rotation.sleep()
+        self.r_rotation.sleep()
+        while not rospy.is_shutdown():
+            try:
+                trans = tfBuffer.lookup_transform(
+                     turtlebot_frame, goal_frame, rospy.Time(0))
+                x_err = trans.transform.translation.x
+                y_err = trans.transform.translation.y
+                z_err = trans.transform.translation.z
+                print "x_err", x_err, "y_err", y_err
+                actual_x_go = self.go_straight(0.2, abs(x_err)-0.1, 1)
+                break
+            except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
+                print "tf errors occur"
+            self.r.sleep()
+
+        # communicate with 7bot
+    #     state = "init"
+    #     self.from_7bot_recieve = "init"
+    #     while not rospy.is_shutdown():
+    #         control.send_static_transform("base_link", "green_near", abs(abs(x_err) - actual_x_go), y_err, z_err, 0, 0, 0, 1) 
+    #         if state == 'init':
+    #             self.to_7bot_publisher("start")
+    #         if self.from_7bot_recieve == "start recieved":
+    #             state == "waiting"
+    #             self.to_7bot_publisher("processing")
+    #         else if self.from_7bot_recieve == "finished":
+    #             break
+        
+
+    # def update_7bot_status(self, data):
+    #     self.from_7bot_recieve = data
+
+    def forward_goal(self):
+
+        # Reset the fail time
+        fail_time = 0
+
+        if self.ang_current == 0:
+
+            # Attempt to move the turtlebot straight
+            move_forward = Bool()
+            move_forward.data = True
+            self.move_forw_pub.publish(move_forward)
+
+            # Wait until we hear the goal has been attempted to proceed
+            rospy.wait_for_message('/custom_goal/attempt', Bool)
+
+            self.r_forward.sleep()
+
+        elif self.ang_current < 360:
+
+            # Tell the turtlebot to not move straight while attempting a rotation
+            move_forward = Bool()
+            move_forward.data = False
+            self.move_forw_pub.publish(move_forward)
+
+            # Increment the current angle counter
+            self.ang_current += self.rot_angle
+
+            # Rotate the turtlebot
+            # self.ang_current = self.rotate(self.rot_speed, self.rot_angle, 1)
+            self.rotate(self.rot_speed, self.rot_angle, 1)
+            
+            # Sleep the rotation timer
+            self.r_rotation.sleep()
+
+            # Set the velocity of turtlebot to zero
+            control_command = Twist()
+            control_command.linear.x = 0
+            control_command.linear.y = 0
+            control_command.linear.z = 0
+            control_command.angular.x = 0
+            control_command.angular.y = 0
+            control_command.angular.z = 0
+
+            # Publish the zero velocity control command
+            self.velocity_publisher.publish(control_command)
+
+        elif self.ang_current >= 360:
+
+            # Reset the current angle to zero
+            self.ang_current = 0
+
+        else:
+
+            # Tell the user we do not have a
+            rospy.loginfo('NO VALID CURRENT ANGLE')
 
     def reset_goal(self, __):
 
@@ -295,14 +257,14 @@ class Controller:
 
     def rotate_radians(self, speed, angle, clockwise):
             # Starts a new node
-        if speed > PI/2 or speed < 0:
-            rospy.loginfo("Speed is negative or is more than PI / 2")
+        if speed > PI /2 or speed < 0:
+            print "speed is negative or is more than PI / 2"
             return
         if not abs(clockwise) == 1:
-            rospy.loginfo("Clockwise must be 1 or -1")
+            print "clockwise must be 1 or -1"
             return  
         if angle < 0:
-            rospy.loginfo("Angle must be positive")
+            print "angle must be positive"
             return
         print "rotate_radians speed", speed, "angle", angle, "clockwise", clockwise
         self.odometry_init_check = False
@@ -322,7 +284,7 @@ class Controller:
         vel_msg.angular.y = 0
 
         # Checking if our movement is CW or CCW
-        if clockwise == -1:
+        if clockwise == 1:
             vel_msg.angular.z = -abs(angular_speed)
             speed_provide =  -abs(angular_speed)
         else:
@@ -343,7 +305,7 @@ class Controller:
         #     velocity_publisher.publish(vel_msg)
         #     t1 = rospy.Time.now().to_sec()
         #     current_angle = angular_speed*(t1-t0)
-        #     r.sleep()
+        #     self.r.sleep()
         orientation = self.odometry.pose.pose.orientation
         current_z = math.atan2(orientation.w * orientation.z + orientation.x *
                                orientation.y, 1 - 2*(orientation.y**2 + orientation.z**2))
@@ -355,7 +317,8 @@ class Controller:
             current_time = rospy.get_time()
             if (current_time - init_time) > 7:
                 break
-
+            # print(self.odometry.pose.pose.orientation.z, inti_z, abs(
+            #     self.odometry.pose.pose.orientation.z - inti_z), relative_angle, tolerance)
             if (relative_angle < abs(current_z - inti_z)):
                 use_clockwise_provide = False
                 use_speed_provide = False
@@ -370,11 +333,10 @@ class Controller:
                     vel_msg.angular.z = 20 * 2*PI/360 * clockwise
             self.velocity_publisher.publish(vel_msg)
             # print("here")
-            # r.sleep()
+            # self.r.sleep()
             orientation = self.odometry.pose.pose.orientation
             current_z = math.atan2(orientation.w * orientation.z + orientation.x *
                                    orientation.y, 1 - 2*(orientation.y**2 + orientation.z**2))
-
         # Forcing our robot to stop
         print("finish", abs(current_z - inti_z) / 2 /PI*360)
         vel_msg.angular.z = 0
@@ -382,7 +344,7 @@ class Controller:
         # rospy.spin()
 
     def rotate(self, speed, angle, clockwise, tolerance = 2 * 2*PI/360):
-        # Starts a new node
+            # Starts a new node
         if speed>90 or speed < 0:
             print "speed is negative or is more than 90"
             return
@@ -393,7 +355,7 @@ class Controller:
             print "angle must be positive"
             return
         print "rotate speed", speed, "angle", angle, "clockwise", clockwise
-        
+
         self.odometry_init_check = False
         while (not self.odometry_init_check):
             pass
@@ -412,7 +374,7 @@ class Controller:
         vel_msg.angular.y = 0
 
         # Checking if our movement is CW or CCW
-        if clockwise == -1:
+        if clockwise == 1:
             vel_msg.angular.z = -abs(angular_speed)
             speed_provide =  -abs(angular_speed)
         else:
@@ -428,12 +390,12 @@ class Controller:
         inti_z = math.atan2(init_orientation.w * init_orientation.z + init_orientation.x *
                             init_orientation.y, 1 - 2*(init_orientation.y**2 + init_orientation.z**2))
 
-        # tolerance = 2 * 2*PI/360
+        
         # while(current_angle < relative_angle):
         #     velocity_publisher.publish(vel_msg)
         #     t1 = rospy.Time.now().to_sec()
         #     current_angle = angular_speed*(t1-t0)
-        #     r.sleep()
+        #     self.r.sleep()
         orientation = self.odometry.pose.pose.orientation
         current_z = math.atan2(orientation.w * orientation.z + orientation.x *
                                orientation.y, 1 - 2*(orientation.y**2 + orientation.z**2))
@@ -445,7 +407,7 @@ class Controller:
             current_time = rospy.get_time()
             if (current_time - init_time) > 7:
                 break
-            # print abs(current_z - inti_z),  relative_angle,abs(abs(current_z - inti_z) - relative_angle), tolerance
+            print abs(current_z - inti_z),  relative_angle,abs(abs(current_z - inti_z) - relative_angle), tolerance
             if (relative_angle < abs(current_z - inti_z)):
                 use_clockwise_provide = False
                 use_speed_provide = False
@@ -462,7 +424,7 @@ class Controller:
                     vel_msg.angular.z = 20 * 2*PI/360 * clockwise
             self.velocity_publisher.publish(vel_msg)
             # print("here")
-            r.sleep()
+            self.r.sleep()
             orientation = self.odometry.pose.pose.orientation
             current_z = math.atan2(orientation.w * orientation.z + orientation.x *
                                    orientation.y, 1 - 2*(orientation.y**2 + orientation.z**2))
@@ -471,8 +433,6 @@ class Controller:
         vel_msg.angular.z = 0
         self.velocity_publisher.publish(vel_msg)
         # rospy.spin()
-
-        return current_z
 
     def go_straight(self, speed, distance, direction):
         if speed>0.5 or speed < 0:
@@ -517,12 +477,13 @@ class Controller:
         #     velocity_publisher.publish(vel_msg)
         #     t1 = rospy.Time.now().to_sec()
         #     current_angle = angular_speed*(t1-t0)
-        #     r.sleep()
+        #     self.r.sleep()
         use_speed_provide = True
         check_back_and_forth = False
         position = self.odometry.pose.pose.position
         while (abs(distance - math.sqrt((init_position.x - position.x)**2 + (init_position.y - position.y)**2)) > tolerance):
             current_distance =  math.sqrt((init_position.x - position.x)**2 + (init_position.y - position.y)**2)
+            print distance, current_distance
             if (distance - current_distance < 0):
                 check_back_and_forth = True
                 use_speed_provide = False
@@ -539,10 +500,7 @@ class Controller:
                 vel_msg.linear.x = -0.05 * direction
                 self.velocity_publisher.publish(vel_msg) 
                 print "too_much"
-            # print "current distance", math.sqrt((init_position.x - position.x)**2 + (init_position.y - position.y)**2)
-            # r.sleep()
             position = self.odometry.pose.pose.position
-            
             # orientation = self.odometry.pose.pose.orientation
             # current_z = math.atan2(orientation.w * orientation.z + orientation.x *
             #                        orientation.y, 1 - 2*(orientation.y**2 + orientation.z**2))
@@ -571,14 +529,16 @@ class Controller:
         static_transformStamped.transform.rotation.w = r_w    
         broadcaster.sendTransform(static_transformStamped)
 
+
 # This is Python's sytax for a main() method, which is run by default
 # when exectued in the shell
 if __name__ == '__main__':
+        # Check if the node has received a signal to shut down
+    # If not, run the talker method
 
     # Run this program as a new node in the ROS computation graph
     # called /turtlebot_controller.
     rospy.init_node('turtlebot_controller', anonymous=True)
-    # rospy.on_shutdown(self.shutdown)
 
     # try:
     #   controller(sys.argv[1], sys.argv[2])
@@ -592,8 +552,8 @@ if __name__ == '__main__':
     #   rotate(speed, angle, clockwise)
     control = Controller()
     # control.rotate(40,90, -1)
-    
     control.controller('base_link', 'object_1green_1')
-
-    # control.go_straight(0.2, 0.4, -1)
+    # control.go_straight(0.2, 0.636, 1)
     # control.rotate_radians(0.785398163397, 0.401055162969, -1)
+    # while(True):
+    #     control.send_static_transform("base_link", "green_near", 1.7, 0.9, 0.2, 0, 0, 0, 1)
