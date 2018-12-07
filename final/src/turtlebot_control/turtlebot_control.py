@@ -93,7 +93,7 @@ class Controller:
                 x_err = trans.transform.translation.x
                 y_err = trans.transform.translation.y
                 print "x_err", x_err, "y_err", y_err
-                theta = math.atan2(abs(y_err), abs(x_err)) / 2
+                theta = math.atan2(abs(y_err), abs(x_err))
                 if y_err < 0: 
                     clockwise = 1
                 else:
@@ -106,14 +106,15 @@ class Controller:
                 if abs(theta) < tolerance:
                     break
                 else:
-                    self.rotate_radians(PI / 4, abs(theta), clockwise)
+                    self.rotate_radians(PI / 4, abs(theta)/2, clockwise)
                 self.r_rotation.sleep()
                 self.r_rotation.sleep()
                 self.r_rotation.sleep()
+                fail_time = 0
             except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
                 # print "tf errors occur"
-                # fail_time += 1
-                # if (not finded_check and fail_time % 5 == 4):
+                fail_time += 1
+                if (fail_time % 3 == 2):
                 #     self.rotate(40, 30, 1)
                 #     self.r_rotation.sleep()
                 # control_command = Twist()
@@ -125,7 +126,7 @@ class Controller:
                 # control_command.angular.z = 0
                 # pub.publish(control_command)
 
-                self.forward_goal()
+                    self.forward_goal()
 
             # Use our rate object to sleep until it is time to publish again
             self.r.sleep()
@@ -167,7 +168,7 @@ class Controller:
         # Reset the fail time
         fail_time = 0
 
-        if self.ang_current == 0:
+        if self.ang_current >= 360:
 
             # Attempt to move the turtlebot straight
             move_forward = Bool()
@@ -178,7 +179,7 @@ class Controller:
             rospy.wait_for_message('/custom_goal/attempt', Bool)
 
             self.r_forward.sleep()
-
+            self.ang_current = 0
         elif self.ang_current < 360:
 
             # Tell the turtlebot to not move straight while attempting a rotation
@@ -208,10 +209,10 @@ class Controller:
             # Publish the zero velocity control command
             self.velocity_publisher.publish(control_command)
 
-        elif self.ang_current >= 360:
+        # elif self.ang_current >= 360:
 
-            # Reset the current angle to zero
-            self.ang_current = 0
+        #     # Reset the current angle to zero
+        #     self.ang_current = 0
 
         else:
 

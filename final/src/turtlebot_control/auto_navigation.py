@@ -134,8 +134,12 @@ class NavTest():
 
             linear_pos  = trans.transform.translation
             orientation = trans.transform.rotation
-            dist_x = self.dist_mv_fwd*math.cos(orientation.z)
-            dist_y = self.dist_mv_fwd*math.sin(orientation.z)
+            # dist_x = self.dist_mv_fwd*math.cos(orientation.z)
+            # dist_y = self.dist_mv_fwd*math.sin(orientation.z)
+
+            (roll, pitch, yaw) = tf2_ros.transformations.euler_from_quaternion(orientation)
+            dist_x = self.dist_mv_fwd*math.cos(yaw)
+            dist_y = self.dist_mv_fwd*math.sin(yaw)
 
             # if abs(direc) == 1:
             new_target_point = Point(linear_pos.x + dist_x,
@@ -158,11 +162,11 @@ class NavTest():
 
             self.move_bot(location)
 
-        elif forward.data == False:
+        # elif forward.data == False:
 
-            # Stop the turtlebot from moving if we tell it to stop moving forward
-            # This makes velocity commands override goal commands.
-            self.shutdown()
+        #     # Stop the turtlebot from moving if we tell it to stop moving forward
+        #     # This makes velocity commands override goal commands.
+        #     self.shutdown()
 
     def move_bot(self, location):
 
